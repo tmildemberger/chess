@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
     al_translate_transform(&transform, (disp_data.width-640)/2, (disp_data.height-640)/2);
     al_use_transform(&transform);
 
-    int i, black = 1;
+    int i, black = 0;
     for(i = 0; i < 64; i++){
         if(black){
             black = !black;
