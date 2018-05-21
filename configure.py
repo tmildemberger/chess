@@ -90,4 +90,95 @@ f.close()
 mk.close()
 print('makefile built')
 
-pass
+
+
+if os == "windows":
+	import subprocess
+	subprocess.call(["mkdir", "codeblocks", "2>nul"], shell=True)
+	gen = open("codeblocks\\chess.cbp", "w")
+	str = """\
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="chess" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/new_test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/new_test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="E:/Documents/coisas_uteis/mingw64/allegro/include" />
+		</Compiler>
+		<Linker>
+			<Add option="-lallegro_monolith-debug-static" />
+			<Add option="-ljpeg" />
+			<Add option="-ldumb" />
+			<Add option="-lFLAC" />
+			<Add option="-lfreetype" />
+			<Add option="-lvorbisfile" />
+			<Add option="-lvorbis" />
+			<Add option="-logg" />
+			<Add option="-lphysfs" />
+			<Add option="-lpng16" />
+			<Add option="-lzlib" />
+			<Add option="-ldsound" />
+			<Add option="-lgdiplus" />
+			<Add option="-luuid" />
+			<Add option="-lkernel32" />
+			<Add option="-lwinmm" />
+			<Add option="-lpsapi" />
+			<Add option="-lopengl32" />
+			<Add option="-lglu32" />
+			<Add option="-luser32" />
+			<Add option="-lcomdlg32" />
+			<Add option="-lgdi32" />
+			<Add option="-lshell32" />
+			<Add option="-lole32" />
+			<Add option="-ladvapi32" />
+			<Add option="-lws2_32" />
+			<Add option="-lshlwapi" />
+			<Add directory="E:/Documents/coisas_uteis/mingw64/allegro/lib" />
+		</Linker>
+		<Unit filename="chess.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>"""
+	gen.write(str)
+	gen.close()
+	copyd = open("codeblocks\\chess.c", "w")
+	copys = open("chess.c", "r")
+	tt = copys.read()
+	copyd.write(tt)
+	copyd.close()
+	copys.close()
+	print("codeblocks project built")
+	pass

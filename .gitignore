@@ -5,3 +5,4 @@ chess.exe
 *.obj
 makefile
 *.log
+codeblocks/
