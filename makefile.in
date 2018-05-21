@@ -1,0 +1,51 @@
+#these come from the configure.py
+#os = linux || windwos
+#obj_ext = .o || .obj
+#exe_ext =  || .exe
+#ALLEG_INC
+#ALLEG_LIB
+
+src = $(wildcard *.c)
+obj = $(src:.c=$(obj_ext))
+dep = $(obj:$(obj_ext)=.dep)
+CC = gcc
+CXX = g++
+CPP = cpp
+proj = chess
+CFLAGS = $(options) -Wall $(ALLEG_INC)
+LDFLAGS = $(ALLEG_LIB)
+EXEC = $(proj)$(exe_ext)
+TEMPS = $(dep)
+
+build: clean greetings $(EXEC) ok
+
+-include $(dep)
+
+%.dep: %.c
+	@$(CPP) $(CFLAGS) $< -MM -MT $(@:.dep=$(obj_ext)) >$@
+
+%$(obj_ext): %.c
+	@$(CC) $(CFLAGS) -o $@ -c $<
+
+$(EXEC): $(obj)
+ifeq ($(os),windows)
+	@$(CXX) -o $@ $^ $(LDFLAGS)
+else 
+	@$(CC) $(LDFLAGS) -o $@ $^
+endif
+	
+.PHONY: greetings
+greetings: 
+	@echo Compiling project $(proj) for $(os)
+
+.PHONY: ok
+ok:
+	@echo No errors
+
+.PHONY: clean
+clean:
+ifeq ($(os),windows)
+	@del $(TEMPS) 2>nul
+else
+	@rm -f $(TEMPS)
+endif

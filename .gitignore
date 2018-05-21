@@ -1,4 +1,8 @@
 *.no
 chess
 chess.exe
-chess.o
+*.o
+*.obj
+makefile
+*.log
+codeblocks/
