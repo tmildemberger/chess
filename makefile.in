@@ -31,7 +31,7 @@ $(EXEC): $(obj)
 ifeq ($(os),windows)
 	@$(CXX) -o $@ $^ $(LDFLAGS)
 else 
-	@$(CC) $(LDFLAGS) -o $@ $^
+	@$(CC) -o $@ $^ $(LDFLAGS)
 endif
 	
 .PHONY: greetings
