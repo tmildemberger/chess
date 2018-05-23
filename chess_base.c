@@ -73,7 +73,7 @@ ChessGame* chess_new_game(){
          * na parte de cima do tabuleiro
          */
         new_node->p = chess_new_piece(  new_match->table_height - i / 8 - 1, 
-                                        i % 8 - 1, 
+                                        i % 8, 
                                         pieces[i], 
                                         BLACK);
 
