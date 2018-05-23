@@ -74,8 +74,14 @@ if platform.machine().endswith("64"):
         mk.write("os = windows\n")
         mk.write("exe_ext = .exe\n")
         mk.write("obj_ext = .obj\n")
-        mk.write("ALLEG_LIB = -LE:\\Documents\\coisas_uteis\\mingw64\\allegro\\lib -lallegro_monolith-debug-static -ljpeg -ldumb -lFLAC -lfreetype -lvorbisfile -lvorbis -logg -lphysfs -lpng16 -lzlib -ldsound -lgdiplus -luuid -lkernel32 -lwinmm -lpsapi -lopengl32 -lglu32 -luser32 -lcomdlg32 -lgdi32 -lshell32 -lole32 -ladvapi32 -lws2_32 -lshlwapi -static-libstdc++ -static-libgcc\n")
-        mk.write("ALLEG_INC = -IE:\\Documents\\coisas_uteis\\mingw64\\allegro\\include\n")
+        if lib_path == "":
+            mk.write("ALLEG_LIB = -LE:\\Documents\\coisas_uteis\\mingw64\\allegro\\lib -lallegro_monolith-debug-static -ljpeg -ldumb -lFLAC -lfreetype -lvorbisfile -lvorbis -logg -lphysfs -lpng16 -lzlib -ldsound -lgdiplus -luuid -lkernel32 -lwinmm -lpsapi -lopengl32 -lglu32 -luser32 -lcomdlg32 -lgdi32 -lshell32 -lole32 -ladvapi32 -lws2_32 -lshlwapi -static-libstdc++ -static-libgcc\n")
+        else:
+            mk.write("ALLEG_LIB = -L" + lib_path + " -lallegro_monolith-debug-static -ljpeg -ldumb -lFLAC -lfreetype -lvorbisfile -lvorbis -logg -lphysfs -lpng16 -lzlib -ldsound -lgdiplus -luuid -lkernel32 -lwinmm -lpsapi -lopengl32 -lglu32 -luser32 -lcomdlg32 -lgdi32 -lshell32 -lole32 -ladvapi32 -lws2_32 -lshlwapi -static-libstdc++ -static-libgcc\n")
+        if inc_path == "":
+            mk.write("ALLEG_INC = -IE:\\Documents\\coisas_uteis\\mingw64\\allegro\\include\n")
+        else:
+            mk.write("ALLEG_INC = -I" + inc_path + "\n")
         print('64 bit windows system detected')
 
     else:
