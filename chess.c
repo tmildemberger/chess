@@ -9,6 +9,8 @@
 const float     width   =   640;
 const float     height  =   640;
 
+const float     FPS     =   60;
+
 int main(int argc, char *argv[]){
     // printf("%d\n", sizeof(Piece));
     ChessGame *match = chess_new_game();
@@ -66,6 +68,10 @@ int main(int argc, char *argv[]){
     ALLEGRO_DISPLAY_MODE    disp_data;
     ALLEGRO_TRANSFORM       transform;
     ALLEGRO_BITMAP          *pawn_png = NULL;
+    ALLEGRO_TIMER           *timer = NULL;
+    ALLEGRO_EVENT_QUEUE     *events_qu = NULL;
+    ALLEGRO_BITMAP          *table = NULL;
+
 
     if (!al_init()){
         chess_error(AL_INIT_ERROR);
@@ -82,6 +88,23 @@ int main(int argc, char *argv[]){
         return AL_PRIMITIVES_INIT_ERROR;
     }
 
+    if (!al_install_mouse()){
+        chess_error(AL_INSTALL_MOUSE_ERROR);
+        return AL_INSTALL_MOUSE_ERROR;
+    }
+
+    if (!al_install_keyboard()){
+        chess_error(AL_INSTALL_KEYBOARD_ERROR);
+        return AL_INSTALL_KEYBOARD_ERROR;
+    }
+
+
+    timer = al_create_timer(1.0 / FPS);
+    if (!timer){
+        chess_error(AL_CREATE_TIMER_ERROR);
+        return AL_CREATE_TIMER_ERROR;
+    }
+
     /**
      * isso serve para descobrir a máxima resolução
      * que é suportada pelo display
@@ -95,20 +118,49 @@ int main(int argc, char *argv[]){
     display = al_create_display(disp_data.width, disp_data.height);
     if (!display){
         chess_error(AL_CREATE_DISPLAY_ERROR);
+        al_destroy_timer(timer);
         return AL_CREATE_DISPLAY_ERROR;
     }
 
     pawn_png = al_load_bitmap("art/pawn.png");
     if (!pawn_png){
         chess_error(AL_IMG_LOAD_ERROR);
+        al_destroy_timer(timer);
+        al_destroy_display(display);
         return AL_IMG_LOAD_ERROR;
     }
 
-    al_clear_to_color(al_map_rgb(0,0,0));
+    table = al_create_bitmap(642, 642);
+    if (!table){
+        chess_error(AL_CREATE_BITMAP_ERROR);
+        al_destroy_timer(timer);
+        al_destroy_display(display);
+        al_destroy_bitmap(pawn_png);
+        return AL_CREATE_BITMAP_ERROR;
+    }
 
-    al_identity_transform(&transform);
-    al_translate_transform(&transform, (disp_data.width-640)/2, (disp_data.height-640)/2);
-    al_use_transform(&transform);
+    events_qu = al_create_event_queue();
+    if (!events_qu){
+        chess_error(AL_CREATE_EVENT_QU_ERROR);
+        al_destroy_timer(timer);
+        al_destroy_display(display);
+        al_destroy_bitmap(pawn_png);
+        al_destroy_bitmap(table);
+        return AL_CREATE_EVENT_QU_ERROR;
+    }
+
+    al_register_event_source(events_qu, al_get_display_event_source(display));
+    al_register_event_source(events_qu, al_get_timer_event_source(timer));
+    al_register_event_source(events_qu, al_get_mouse_event_source());
+    al_register_event_source(events_qu, al_get_keyboard_event_source());
+
+    al_set_target_bitmap(table);
+
+    // al_identity_transform(&transform);
+    // al_translate_transform(&transform, 1, 1);
+    // al_use_transform(&transform);
+
+    al_clear_to_color(al_map_rgb(0,0,0));
 
     // int i, 
     black = 0;
@@ -128,18 +180,33 @@ int main(int argc, char *argv[]){
         }
     }
 
+    al_set_target_backbuffer(display);
+
+    al_clear_to_color(al_map_rgb(0,0,0));    
+
+    al_identity_transform(&transform);
+    al_translate_transform(&transform, (disp_data.width-640)/2, (disp_data.height-640)/2);
+    al_use_transform(&transform);
+
+    al_draw_bitmap(table, 0, 0, 0);
+
     al_draw_line(-0.5, -0.5, -0.5, 640.5, al_map_rgb(13, 77, 77), 1.0);
     al_draw_line(-0.5, -0.5, 640.5, -0.5, al_map_rgb(13, 77, 77), 1.0);
     al_draw_line(-0.5, 640.5, 640.5, 640.5, al_map_rgb(13, 77, 77), 1.0);
     al_draw_line(640.5, -0.5, 640.5, 640.5, al_map_rgb(13, 77, 77), 1.0);
 
     al_identity_transform(&transform);
-    al_use_transform(&transform);    
+    al_use_transform(&transform);
 
     al_flip_display();
 
     al_rest(7);
+    
+    al_destroy_timer(timer);
     al_destroy_display(display);
+    al_destroy_bitmap(pawn_png);
+    al_destroy_bitmap(table);
+    al_destroy_event_queue(events_qu);
 
 
     chess_game_over(match);
