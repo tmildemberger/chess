@@ -45,10 +45,10 @@ ChessBoard* chess_new_game(void){
         last_node->nxt = new_node;
 
         
-        new_node->p = chess_new_piece(  i / 8, 
-                                        i % 8, 
-                                        pieces[i], 
-                                        WHITE);
+        new_node->piece = chess_new_piece(  i / 8, 
+                                            i % 8, 
+                                            pieces[i], 
+                                            WHITE);
 
         last_node = new_node;
     }
@@ -72,10 +72,10 @@ ChessBoard* chess_new_game(void){
          * isso faz com que as novas peças sejam colocadas
          * na parte de cima do tabuleiro
          */
-        new_node->p = chess_new_piece(  new_board->board_height - i / 8 - 1, 
-                                        i % 8, 
-                                        pieces[i], 
-                                        BLACK);
+        new_node->piece = chess_new_piece(  new_board->board_height - i / 8 - 1, 
+                                            i % 8, 
+                                            pieces[i], 
+                                            BLACK);
 
         /**
          * o novo nó se torna o anterior para a próxima iteração
@@ -114,8 +114,8 @@ ChessPiece* chess_new_piece(char row, char col, char name, char team){
 ChessPiece* chess_piece_in_pos(ChessBoard *play, char row, char col){
     ChessNode *current = play->alive_head.nxt;
     while (current != NULL){
-        if (current->p->row == row && current->p->column == col){
-            return current->p;
+        if (current->piece->row == row && current->piece->column == col){
+            return current->piece;
         }
         current = current->nxt;
     }
@@ -146,7 +146,7 @@ void chess_game_over(ChessBoard* play){
         /**
          * destrói peça e nó correspondente
          */
-        chess_destroy_piece(current->p);
+        chess_destroy_piece(current->piece);
         free(current);
 
         /**
@@ -177,7 +177,7 @@ void chess_game_over(ChessBoard* play){
         /**
          * destrói peça e nó correspondente
          */
-        chess_destroy_piece(current->p);
+        chess_destroy_piece(current->piece);
         free(current);
 
         /**

@@ -29,12 +29,26 @@ typedef struct piece{
 } ChessPiece;
 
 /**
+ * a existência dessa struct é explicada quando se
+ * vê como ela facilita para fazer uma lista de jogadas
+ */
+typedef struct move{
+    char fromRow;
+    char fromCol;
+    char toRow;
+    char toCol;
+} ChessMove;
+ 
+/**
  * struct node --- ChessNode
  * isso serve para fazer
  * listas de peças
  */
 typedef struct node{
-    ChessPiece *p;
+    union{
+        ChessPiece *piece;
+        ChessMove *move;
+    };
     struct node *nxt;
 } ChessNode;
 
@@ -48,14 +62,11 @@ typedef struct node{
 typedef struct board{
     ChessNode alive_head;
     ChessNode not_alive_head;
-    int board_width;
-    int board_height;
-
+    short board_width;
+    short board_height;
+    short movements;
+    short turn;
 } ChessBoard;
-
-typedef struct jogada{
-
-} ChessPlay;
 
 ChessBoard* chess_new_game(void);
 ChessPiece* chess_new_piece(char row, char col, char name, char team);
