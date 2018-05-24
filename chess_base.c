@@ -6,7 +6,7 @@
 /**
  * Primeira função a ser chamada - cria um novo jogo
  */
-ChessGame* chess_new_game(){
+ChessGame* chess_new_game(void){
     /**
      * por causa do calloc, o 'nxt' do 'not_alive_head' do
      * new_match já é inicializado com NULL (lista vazia)
@@ -107,6 +107,10 @@ ChessPiece* chess_new_piece(char row, char col, char name, char team){
     return new_piece;
 }
 
+/**
+ * retorna a peça na posição enviada, e NULL
+ * se não houver peça nessa casa
+ */
 ChessPiece* chess_piece_in_pos(ChessGame *play, char row, char col){
     ChessNode *current = play->alive_head.nxt;
     while (current != NULL){

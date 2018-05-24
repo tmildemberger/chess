@@ -53,12 +53,12 @@ typedef struct game{
 
 } ChessGame;
 
-ChessGame* chess_new_game();
-ChessPiece* chess_new_piece(char, char, char, char);
+ChessGame* chess_new_game(void);
+ChessPiece* chess_new_piece(char row, char col, char name, char team);
 
-ChessPiece* chess_piece_in_pos(ChessGame*, char, char);
+ChessPiece* chess_piece_in_pos(ChessGame *play, char row, char col);
 
-void chess_game_over(ChessGame*);
-void chess_destroy_piece(ChessPiece*);
+void chess_game_over(ChessGame* play);
+void chess_destroy_piece(ChessPiece* pic);
 
 #endif

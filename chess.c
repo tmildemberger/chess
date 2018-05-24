@@ -4,6 +4,7 @@
 #include "allegro5/allegro_primitives.h"
 
 #include "chess_base.h"
+#include "chess_error.h"
 
 const float     width   =   640;
 const float     height  =   640;
@@ -54,35 +55,53 @@ int main(int argc, char *argv[]){
         black = !black;
     }
 
-    chess_game_over(match);
+    // chess_game_over(match);
 
 
 
 
 
-    return 0;
+    // return 0;
     ALLEGRO_DISPLAY         *display = NULL;
     ALLEGRO_DISPLAY_MODE    disp_data;
     ALLEGRO_TRANSFORM       transform;
+    ALLEGRO_BITMAP          *pawn_png = NULL;
 
     if (!al_init()){
-        return 1;
+        chess_error(AL_INIT_ERROR);
+        return AL_INIT_ERROR;
     }
 
     if (!al_init_image_addon()){
-        return 1;
+        chess_error(AL_IMAGE_INIT_ERROR);
+        return AL_IMAGE_INIT_ERROR;
     }
 
     if (!al_init_primitives_addon()){
-        return 1;
+        chess_error(AL_PRIMITIVES_INIT_ERROR);
+        return AL_PRIMITIVES_INIT_ERROR;
     }
 
+    /**
+     * isso serve para descobrir a máxima resolução
+     * que é suportada pelo display
+     */
     al_get_display_mode(al_get_num_display_modes() - 1, &disp_data);
 
+    /**
+     * cria um display em fullscreen na resolução máxima
+     */
     al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
     display = al_create_display(disp_data.width, disp_data.height);
     if (!display){
-        return 1;
+        chess_error(AL_CREATE_DISPLAY_ERROR);
+        return AL_CREATE_DISPLAY_ERROR;
+    }
+
+    pawn_png = al_load_bitmap("art/pawn.png");
+    if (!pawn_png){
+        chess_error(AL_IMG_LOAD_ERROR);
+        return AL_IMG_LOAD_ERROR;
     }
 
     al_clear_to_color(al_map_rgb(0,0,0));
@@ -91,7 +110,8 @@ int main(int argc, char *argv[]){
     al_translate_transform(&transform, (disp_data.width-640)/2, (disp_data.height-640)/2);
     al_use_transform(&transform);
 
-    // int i, black = 0;
+    // int i, 
+    black = 0;
     for (i = 0; i < 64; i++){
         if (black){
             black = !black;
@@ -101,6 +121,11 @@ int main(int argc, char *argv[]){
             black = !black;
         }
         if (i%8==7) black = !black;
+
+        ChessPiece *pccc = chess_piece_in_pos(match, i/8, i%8);
+        if (pccc != NULL){
+            al_draw_bitmap(pawn_png, i%8*80., i/8*80., 0);
+        }
     }
 
     al_draw_line(-0.5, -0.5, -0.5, 640.5, al_map_rgb(13, 77, 77), 1.0);
@@ -115,6 +140,9 @@ int main(int argc, char *argv[]){
 
     al_rest(7);
     al_destroy_display(display);
-   
+
+
+    chess_game_over(match);
+
     return 0;
 }

@@ -5,13 +5,21 @@
 const char *err_msg_pt[] = {
                     "erro 1",
                     "erro 2",
-                    "erro 3"
+                    "erro 3",
+                    "erro 4",
+                    "erro 5",
+                    "erro 6",
+                    "erro 7"
                     };
 
 const char *err_msg_en[] = {
                     "error 1",
                     "error 2",
-                    "error 3"
+                    "error 3",
+                    "error 4",
+                    "error 5",
+                    "error 6",
+                    "error 7"
                     };
 
 const char **err_msg[] = {
