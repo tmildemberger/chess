@@ -39,7 +39,7 @@ typedef struct node{
 } ChessNode;
 
 /**
- * struct game --- ChessGame
+ * struct game --- ChessTable
  * essa é a estrutura principal,
  * que sabe qual é o tamanho do
  * tabuleiro, e mantém o registro
@@ -51,14 +51,14 @@ typedef struct game{
     int table_width;
     int table_height;
 
-} ChessGame;
+} ChessTable;
 
-ChessGame* chess_new_game(void);
+ChessTable* chess_new_game(void);
 ChessPiece* chess_new_piece(char row, char col, char name, char team);
 
-ChessPiece* chess_piece_in_pos(ChessGame *play, char row, char col);
+ChessPiece* chess_piece_in_pos(ChessTable *play, char row, char col);
 
-void chess_game_over(ChessGame* play);
+void chess_game_over(ChessTable* play);
 void chess_destroy_piece(ChessPiece* pic);
 
 #endif

@@ -13,7 +13,7 @@ const float     FPS     =   60;
 
 int main(int argc, char *argv[]){
     // printf("%d\n", sizeof(Piece));
-    ChessGame *match = chess_new_game();
+    ChessTable *match = chess_new_game();
 
     int i;
     int j;
