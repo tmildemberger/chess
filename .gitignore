@@ -6,3 +6,4 @@ chess.exe
 makefile
 *.log
 codeblocks/
+.vscode/
