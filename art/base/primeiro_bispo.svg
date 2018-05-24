@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="80"
+   height="80"
+   viewBox="0 0 21.166666 21.166667"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.1 r15371"
+   sodipodi:docname="primeiro_bispo.svg"
+   inkscape:export-filename="/home/thiago/Programming/Allegro/Chess/art/pawn.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.6"
+     inkscape:cx="34.821429"
+     inkscape:cy="39.642857"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1024"
+     inkscape:window-height="706"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:measure-start="10,21.0714"
+     inkscape:measure-end="10.3571,0"
+     inkscape:snap-others="false"
+     inkscape:object-nodes="false"
+     inkscape:snap-nodes="false" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Camada 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-275.83332)">
+    <rect
+       id="rect3680"
+       width="6.8791666"
+       height="2.1166666"
+       x="7.1437497"
+       y="285.09375"
+       style="fill:#226666;fill-opacity:1;stroke:none;stroke-width:0.12747942"
+       rx="0.73705357"
+       ry="0.79375011" />
+    <path
+       style="fill:#226666;fill-opacity:1;stroke:none;stroke-width:0.3197048px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 4.7625,295.1479 c 0,-1.20799 1.5899623,-5.54671 3.4395833,-6.61459 h 4.7624997 c 0.114175,2.92801 1.11012,5.19856 3.439584,6.61459 -5.954694,-0.0959 -7.4880587,0 -11.641667,0 z"
+       id="path5947"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#226666;fill-opacity:1;stroke:none;stroke-width:0.26537243px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 9.2712564,285.09374 c -3.2795196,-2.07887 -1.2247207,-4.165 -0.7984918,-6.08542 0.6274533,1.82406 0.6370897,1.83516 1.3308196,3.43958 0.4560828,-0.23821 0.4182578,-0.19843 0.7984918,-0.52916 -0.8555273,-2.26786 -0.8381721,-2.28044 -1.3308196,-3.43959 0,0 0.9344596,0.0945 1.1418316,-1.22842 0.538101,1.32291 1.519808,1.22842 1.519808,1.22842 0.622578,3.64269 2.661638,3.68527 4e-6,6.61459 H 9.2712604 Z"
+       id="path4503"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccc" />
+    <ellipse
+       style="fill:#226666;fill-opacity:1;stroke:none;stroke-width:0.30244392"
+       id="path4507"
+       cx="10.609792"
+       cy="277.48697"
+       rx="1.190625"
+       ry="0.9921875" />
+  </g>
+</svg>
