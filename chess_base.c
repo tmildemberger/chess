@@ -6,13 +6,13 @@
 /**
  * Primeira função a ser chamada - cria um novo jogo
  */
-ChessTable* chess_new_game(void){
+ChessBoard* chess_new_game(void){
     /**
      * por causa do calloc, o 'nxt' do 'not_alive_head' do
-     * new_table já é inicializado com NULL (lista vazia)
+     * new_board já é inicializado com NULL (lista vazia)
      */
-    ChessTable *new_table = calloc(1, sizeof(ChessTable));
-    if (new_table == NULL){
+    ChessBoard *new_board = calloc(1, sizeof(ChessBoard));
+    if (new_board == NULL){
         chess_error(ALLOC_ERROR);
     }
 
@@ -20,13 +20,13 @@ ChessTable* chess_new_game(void){
      * pelo menos por enquanto o tamanho do
      * tabuleiro está fixo em oito por oito
      */
-    new_table->table_width = TABLE_WIDTH;
-    new_table->table_height = TABLE_HEIGHT;
+    new_board->board_width = TABLE_WIDTH;
+    new_board->board_height = TABLE_HEIGHT;
 
     char pieces[16] = {ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK,
                         PAWN, PAWN, PAWN, PAWN, PAWN, PAWN, PAWN, PAWN};
     
-    ChessNode *last_node = &(new_table->alive_head);
+    ChessNode *last_node = &(new_board->alive_head);
     ChessNode *new_node = NULL;
     int i;
     for (i = 0; i < 16; i++){
@@ -72,7 +72,7 @@ ChessTable* chess_new_game(void){
          * isso faz com que as novas peças sejam colocadas
          * na parte de cima do tabuleiro
          */
-        new_node->p = chess_new_piece(  new_table->table_height - i / 8 - 1, 
+        new_node->p = chess_new_piece(  new_board->board_height - i / 8 - 1, 
                                         i % 8, 
                                         pieces[i], 
                                         BLACK);
@@ -83,7 +83,7 @@ ChessTable* chess_new_game(void){
         last_node = new_node;
     }
 
-    return new_table;
+    return new_board;
 }
 
 /**
@@ -111,7 +111,7 @@ ChessPiece* chess_new_piece(char row, char col, char name, char team){
  * retorna a peça na posição enviada, e NULL
  * se não houver peça nessa casa
  */
-ChessPiece* chess_piece_in_pos(ChessTable *play, char row, char col){
+ChessPiece* chess_piece_in_pos(ChessBoard *play, char row, char col){
     ChessNode *current = play->alive_head.nxt;
     while (current != NULL){
         if (current->p->row == row && current->p->column == col){
@@ -125,7 +125,7 @@ ChessPiece* chess_piece_in_pos(ChessTable *play, char row, char col){
 /**
  * destrói o jogo todo
  */
-void chess_game_over(ChessTable* play){
+void chess_game_over(ChessBoard* play){
     /**
      * destruir todos os nós e peças ainda vivas
      */
@@ -188,7 +188,7 @@ void chess_game_over(ChessTable* play){
     }
 
     /**
-     * destruir o próprio ChessTable
+     * destruir o próprio ChessBoard
      */
     free(play);
 }

@@ -13,7 +13,7 @@ const float     FPS     =   60;
 
 int main(int argc, char *argv[]){
     // printf("%d\n", sizeof(Piece));
-    ChessTable *match = chess_new_game();
+    ChessBoard *match = chess_new_game();
 
     int i;
     int j;
@@ -21,8 +21,8 @@ int main(int argc, char *argv[]){
     ChessPiece *pice = NULL;
     int black = 0;
 
-    for (i = 0; i < match->table_height; i++){
-        for (j = 0; j < match->table_width; j++){
+    for (i = 0; i < match->board_height; i++){
+        for (j = 0; j < match->board_width; j++){
             if ( (pice = chess_piece_in_pos(match, i, j)) != NULL ){
                 switch (pice->name){
                     case PAWN:

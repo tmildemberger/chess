@@ -39,26 +39,30 @@ typedef struct node{
 } ChessNode;
 
 /**
- * struct game --- ChessTable
+ * struct game --- ChessBoard
  * essa é a estrutura principal,
  * que sabe qual é o tamanho do
  * tabuleiro, e mantém o registro
  * de quais peças estão vivas ou não
  */
-typedef struct game{
+typedef struct board{
     ChessNode alive_head;
     ChessNode not_alive_head;
-    int table_width;
-    int table_height;
+    int board_width;
+    int board_height;
 
-} ChessTable;
+} ChessBoard;
 
-ChessTable* chess_new_game(void);
+typedef struct jogada{
+
+} ChessPlay;
+
+ChessBoard* chess_new_game(void);
 ChessPiece* chess_new_piece(char row, char col, char name, char team);
 
-ChessPiece* chess_piece_in_pos(ChessTable *play, char row, char col);
+ChessPiece* chess_piece_in_pos(ChessBoard *play, char row, char col);
 
-void chess_game_over(ChessTable* play);
+void chess_game_over(ChessBoard* play);
 void chess_destroy_piece(ChessPiece* pic);
 
 #endif
