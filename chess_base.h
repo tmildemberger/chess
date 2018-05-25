@@ -10,9 +10,27 @@
 
 #define WHITE 0
 #define BLACK 1
+#define WAITING_PROMOTION 2
+/**
+ * ^^^^-> "terceiro estado" de um jogo:
+ * ||||-> acontece depois de um movimento de
+ * \\\\-> promoção, depois do qual se fica esperando
+ *  \\\-> pela peça promovida para ser escolhida
+ */
 
 #define TABLE_WIDTH 8
 #define TABLE_HEIGHT 8
+
+#define VALID_MOVE 0
+#define INVALID_MOVE 1
+
+#define UNKNOWN_MOVE 0
+#define NORMAL_MOVE 1
+#define CAPTURE_MOVE 2
+#define CASTLING_MOVE 3
+#define EN_PASSANT_MOVE 4
+#define PROMOTION_MOVE 5
+#define PROMOTION_PIECE 6
 
 /**
  * struct piece --- ChessPiece
@@ -37,12 +55,13 @@ typedef struct move{
     char fromCol;
     char toRow;
     char toCol;
+    int moveType;
 } ChessMove;
  
 /**
  * struct node --- ChessNode
  * isso serve para fazer
- * listas de peças
+ * listas de peças ou jogadas
  */
 typedef struct node{
     union{
@@ -72,6 +91,8 @@ ChessBoard* chess_new_game(void);
 ChessPiece* chess_new_piece(char row, char col, char name, char team);
 
 ChessPiece* chess_piece_in_pos(ChessBoard *play, char row, char col);
+int chess_is_valid_move(ChessBoard *play, ChessMove *move);
+void chess_apply_move(ChessBoard *play, ChessMove *move);
 
 void chess_game_over(ChessBoard* play);
 void chess_destroy_piece(ChessPiece* pic);

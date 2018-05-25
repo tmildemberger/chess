@@ -123,6 +123,34 @@ ChessPiece* chess_piece_in_pos(ChessBoard *play, char row, char col){
 }
 
 /**
+ * recebe uma jogada e retorna VALID_MOVE se válida
+ * ou INVALID_MOVE se inválida, levando em conta a 
+ * situação do tabuleiro que também recebe
+ */
+int chess_is_valid_move(ChessBoard *play, ChessMove *move){
+    /**
+     * @todo: função pra ver se a peça pode se mover
+     * (por enquanto só retorna sim), função pra ver se 
+     * o movimento pode ser normal (se sim e se for um peão,
+     * ver se ele chegou à última casa), funções pra ver se
+     * o movimento pode ser especial
+     */
+    return VALID_MOVE;
+}
+
+/**
+ * no tabuleiro enviado, realiza uma jogada que se
+ * presume ser válida
+ */
+void chess_apply_move(ChessBoard *play, ChessMove *move){
+    ChessPiece *piece = chess_piece_in_pos(play, move->fromRow, move->fromCol);
+    /**
+     * para cada tipo de movimento algo diferente será feito.
+     * serão chamadas funções ou vai ser tudo aqui?
+     */
+}
+
+/**
  * destrói o jogo todo
  */
 void chess_game_over(ChessBoard* play){
