@@ -135,6 +135,7 @@ int chess_is_valid_move(ChessBoard *play, ChessMove *move){
      * ver se ele chegou à última casa), funções pra ver se
      * o movimento pode ser especial
      */
+    move->moveType = NORMAL_MOVE;
     return VALID_MOVE;
 }
 
@@ -148,6 +149,11 @@ void chess_apply_move(ChessBoard *play, ChessMove *move){
      * para cada tipo de movimento algo diferente será feito.
      * serão chamadas funções ou vai ser tudo aqui?
      */
+    if (move->moveType == NORMAL_MOVE){
+        piece->movs++;
+        piece->column = move->toCol;
+        piece->row = move->toRow;
+    }
 }
 
 /**

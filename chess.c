@@ -18,10 +18,17 @@ int main(int argc, char *argv[]){
     int i;
     int j;
 
-    ChessPiece *pice = NULL;
+    ChessPiece *pice = chess_piece_in_pos(match, 0, 0);
+    ChessMove *mv = calloc(1, sizeof(ChessMove));
+    mv->fromCol = pice->column;
+    mv->fromRow = pice->row;
+    mv->toCol = 1;
+    mv->toRow = 3;
+    chess_is_valid_move(match, mv);
+    chess_apply_move(match, mv);
     int black = 0;
 
-    for (i = 0; i < match->board_height; i++){
+    for (i = match->board_height-1; i >= 0 ; i--){
         for (j = 0; j < match->board_width; j++){
             if ( (pice = chess_piece_in_pos(match, i, j)) != NULL ){
                 switch (pice->name){
