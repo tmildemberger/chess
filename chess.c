@@ -19,18 +19,14 @@ int main(int argc, char *argv[]){
     int j;
 
     ChessPiece *pice = chess_piece_in_pos(match, 0, 0);
-    ChessMove *mv = calloc(1, sizeof(ChessMove));
-    mv->fromCol = pice->column;
-    mv->fromRow = pice->row;
-    mv->toCol = 1;
-    mv->toRow = 3;
-    chess_is_valid_move(match, mv);
+    ChessMove *mv = chess_is_valid_move(match, pice->column, pice->row, 1, 3);
     chess_apply_move(match, mv);
+    chess_destroy_move(mv);
     int black = 0;
 
     for (i = match->board_height-1; i >= 0 ; i--){
         for (j = 0; j < match->board_width; j++){
-            if ( (pice = chess_piece_in_pos(match, i, j)) != NULL ){
+            if ( (pice = chess_piece_in_pos(match, j, i)) != NULL ){
                 switch (pice->name){
                     case PAWN:
                         fputc( (pice->team) == WHITE ? 'P' : 'p', stdout);
@@ -181,7 +177,7 @@ int main(int argc, char *argv[]){
         }
         if (i%8==7) black = !black;
 
-        ChessPiece *pccc = chess_piece_in_pos(match, i/8, i%8);
+        ChessPiece *pccc = chess_piece_in_pos(match, i%8, i/8);
         if (pccc != NULL){
             al_draw_bitmap(pawn_png, i%8*80., i/8*80., 0);
         }

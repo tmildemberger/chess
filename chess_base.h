@@ -21,9 +21,8 @@
 #define TABLE_WIDTH 8
 #define TABLE_HEIGHT 8
 
-#define VALID_MOVE 0
-#define INVALID_MOVE 1
 
+#define INVALID_MOVE -1
 #define UNKNOWN_MOVE 0
 #define NORMAL_MOVE 1
 #define CAPTURE_MOVE 2
@@ -88,10 +87,11 @@ typedef struct board{
 } ChessBoard;
 
 ChessBoard* chess_new_game(void);
-ChessPiece* chess_new_piece(char row, char col, char name, char team);
+ChessPiece* chess_new_piece(char col, char row, char name, char team);
 
-ChessPiece* chess_piece_in_pos(ChessBoard *play, char row, char col);
-int chess_is_valid_move(ChessBoard *play, ChessMove *move);
+ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row);
+ChessMove* chess_is_valid_move(ChessBoard *play, char fromCol, char fromRow,
+                                                 char toCol, char toRow);
 void chess_apply_move(ChessBoard *play, ChessMove *move);
 
 void chess_game_over(ChessBoard* play);

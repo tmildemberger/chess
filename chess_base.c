@@ -45,8 +45,8 @@ ChessBoard* chess_new_game(void){
         last_node->nxt = new_node;
 
         
-        new_node->piece = chess_new_piece(  i / 8, 
-                                            i % 8, 
+        new_node->piece = chess_new_piece(  i % 8, 
+                                            i / 8, 
                                             pieces[i], 
                                             WHITE);
 
@@ -72,8 +72,8 @@ ChessBoard* chess_new_game(void){
          * isso faz com que as novas peças sejam colocadas
          * na parte de cima do tabuleiro
          */
-        new_node->piece = chess_new_piece(  new_board->board_height - i / 8 - 1, 
-                                            i % 8, 
+        new_node->piece = chess_new_piece(  i % 8, 
+                                            new_board->board_height - i / 8 - 1, 
                                             pieces[i], 
                                             BLACK);
 
@@ -89,14 +89,14 @@ ChessBoard* chess_new_game(void){
 /**
  * cria uma peça com as informações enviadas
  */
-ChessPiece* chess_new_piece(char row, char col, char name, char team){
+ChessPiece* chess_new_piece(char col, char row, char name, char team){
     ChessPiece *new_piece = calloc(1, sizeof(ChessPiece));
     if (new_piece == NULL){
         chess_error(ALLOC_ERROR);
     }
 
-    new_piece->row = row;
     new_piece->column = col;
+    new_piece->row = row;
     new_piece->name = name;
     new_piece->team = team;
     /**
@@ -111,7 +111,7 @@ ChessPiece* chess_new_piece(char row, char col, char name, char team){
  * retorna a peça na posição enviada, e NULL
  * se não houver peça nessa casa
  */
-ChessPiece* chess_piece_in_pos(ChessBoard *play, char row, char col){
+ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row){
     ChessNode *current = play->alive_head.nxt;
     while (current != NULL){
         if (current->piece->row == row && current->piece->column == col){
@@ -127,7 +127,8 @@ ChessPiece* chess_piece_in_pos(ChessBoard *play, char row, char col){
  * ou INVALID_MOVE se inválida, levando em conta a 
  * situação do tabuleiro que também recebe
  */
-int chess_is_valid_move(ChessBoard *play, ChessMove *move){
+ChessMove* chess_is_valid_move(ChessBoard *play, char fromCol, char fromRow,
+                                                 char toCol, char toRow){
     /**
      * @todo: função pra ver se a peça pode se mover
      * (por enquanto só retorna sim), função pra ver se 
@@ -135,8 +136,16 @@ int chess_is_valid_move(ChessBoard *play, ChessMove *move){
      * ver se ele chegou à última casa), funções pra ver se
      * o movimento pode ser especial
      */
+    ChessMove *move = calloc(1, sizeof(ChessMove));
+    if (move == NULL){
+        chess_error(ALLOC_ERROR);
+    }
+    move->fromCol = fromCol;
+    move->fromRow = fromRow;
+    move->toCol = toCol;
+    move->toRow = toRow;
     move->moveType = NORMAL_MOVE;
-    return VALID_MOVE;
+    return move;
 }
 
 /**
@@ -144,7 +153,7 @@ int chess_is_valid_move(ChessBoard *play, ChessMove *move){
  * presume ser válida
  */
 void chess_apply_move(ChessBoard *play, ChessMove *move){
-    ChessPiece *piece = chess_piece_in_pos(play, move->fromRow, move->fromCol);
+    ChessPiece *piece = chess_piece_in_pos(play, move->fromCol, move->fromRow);
     /**
      * para cada tipo de movimento algo diferente será feito.
      * serão chamadas funções ou vai ser tudo aqui?
@@ -230,6 +239,10 @@ void chess_game_over(ChessBoard* play){
 /**
  * somente destrói a peça
  */
-void chess_destroy_piece(ChessPiece* pic){
+void chess_destroy_piece(ChessPiece *pic){
     free(pic);
+}
+
+void chess_destroy_move(ChessMove *mov){
+    free(mov);
 }
