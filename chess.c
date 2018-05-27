@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
     int j;
 
     ChessPiece *pice = chess_piece_in_pos(match, 0, 0);
-    ChessMove *mv = chess_is_valid_move(match, pice->column, pice->row, 1, 3);
+    ChessMove *mv = chess_is_valid_move(match, pice, 1, 3);
     chess_apply_move(match, mv);
     chess_destroy_move(mv);
     int black = 0;

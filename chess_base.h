@@ -90,11 +90,12 @@ ChessBoard* chess_new_game(void);
 ChessPiece* chess_new_piece(char col, char row, char name, char team);
 
 ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row);
-ChessMove* chess_is_valid_move(ChessBoard *play, char fromCol, char fromRow,
+ChessMove* chess_is_valid_move(ChessBoard *play, ChessPiece *piece,
                                                  char toCol, char toRow);
 void chess_apply_move(ChessBoard *play, ChessMove *move);
 
-void chess_game_over(ChessBoard* play);
-void chess_destroy_piece(ChessPiece* pic);
+void chess_game_over(ChessBoard *play);
+void chess_destroy_piece(ChessPiece *pic);
+void chess_destroy_move(ChessMove *move);
 
 #endif

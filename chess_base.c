@@ -127,7 +127,7 @@ ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row){
  * ou INVALID_MOVE se inválida, levando em conta a 
  * situação do tabuleiro que também recebe
  */
-ChessMove* chess_is_valid_move(ChessBoard *play, char fromCol, char fromRow,
+ChessMove* chess_is_valid_move(ChessBoard *play, ChessPiece *piece,
                                                  char toCol, char toRow){
     /**
      * @todo: função pra ver se a peça pode se mover
@@ -140,8 +140,12 @@ ChessMove* chess_is_valid_move(ChessBoard *play, char fromCol, char fromRow,
     if (move == NULL){
         chess_error(ALLOC_ERROR);
     }
-    move->fromCol = fromCol;
-    move->fromRow = fromRow;
+    if (piece == NULL){
+        move->moveType = INVALID_MOVE;
+        return move;
+    }
+    move->fromCol = piece->column;
+    move->fromRow = piece->row;
     move->toCol = toCol;
     move->toRow = toRow;
     move->moveType = NORMAL_MOVE;
@@ -168,7 +172,7 @@ void chess_apply_move(ChessBoard *play, ChessMove *move){
 /**
  * destrói o jogo todo
  */
-void chess_game_over(ChessBoard* play){
+void chess_game_over(ChessBoard *play){
     /**
      * destruir todos os nós e peças ainda vivas
      */
