@@ -31,6 +31,7 @@
 #define PROMOTION_MOVE 5
 #define PROMOTION_PIECE 6
 
+#include "chess_error.h"
 #include <stdlib.h>
 
 /**
@@ -70,6 +71,7 @@ typedef struct node{
         ChessMove *move;
     };
     struct node *nxt;
+    struct node *prv;
 } ChessNode;
 
 /**
@@ -80,8 +82,8 @@ typedef struct node{
  * de quais peças estão vivas ou não
  */
 typedef struct board{
-    ChessNode alive_head;
-    ChessNode not_alive_head;
+    ChessNode *alive_head;
+    ChessNode *not_alive_head;
     short board_width;
     short board_height;
     short movements;

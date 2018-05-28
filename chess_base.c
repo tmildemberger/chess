@@ -1,5 +1,5 @@
 #include "chess_base.h"
-#include "chess_error.h"
+#include "chess_list.h"
 
 /**
  * Primeira função a ser chamada - cria um novo jogo
@@ -14,6 +14,9 @@ ChessBoard* chess_new_game(void){
         chess_error(ALLOC_ERROR);
     }
 
+    new_board->alive_head = chess_list_create();
+    new_board->not_alive_head = chess_list_create();
+
     /**
      * pelo menos por enquanto o tamanho do
      * tabuleiro está fixo em oito por oito
@@ -24,61 +27,26 @@ ChessBoard* chess_new_game(void){
     char pieces[16] = {ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK,
                         PAWN, PAWN, PAWN, PAWN, PAWN, PAWN, PAWN, PAWN};
     
-    ChessNode *last_node = &(new_board->alive_head);
-    ChessNode *new_node = NULL;
+    ChessPiece *new_piece = NULL;
     int i;
     for (i = 0; i < 16; i++){
-        /**
-         * por causa do calloc, o 'nxt' do new_node
-         * já é inicializado com NULL
-         */
-        new_node = calloc(1, sizeof(ChessNode));
-        if (new_node == NULL){
-            chess_error(ALLOC_ERROR);
-        }
-
-        /**
-         * fazemos o nó anterior apontar para o novo nó
-         */
-        last_node->nxt = new_node;
-
         
-        new_node->piece = chess_new_piece(  i % 8, 
+        new_piece = chess_new_piece(        i % 8, 
                                             i / 8, 
                                             pieces[i], 
                                             WHITE);
 
-        last_node = new_node;
+        chess_list_append_new_piece(new_board->alive_head, new_piece);
     }
 
     for (i = 0; i < 16; i++){
-        /**
-         * por causa do calloc, o 'nxt' do new_node
-         * já é inicializado com NULL
-         */
-        new_node = calloc(1, sizeof(ChessNode));
-        if (new_node == NULL){
-            chess_error(ALLOC_ERROR);
-        }
-
-        /**
-         * fazemos o nó anterior apontar para o novo nó
-         */
-        last_node->nxt = new_node;
-
-        /**
-         * isso faz com que as novas peças sejam colocadas
-         * na parte de cima do tabuleiro
-         */
-        new_node->piece = chess_new_piece(  i % 8, 
+        
+        new_piece = chess_new_piece(        i % 8, 
                                             new_board->board_height - i / 8 - 1, 
                                             pieces[i], 
                                             BLACK);
 
-        /**
-         * o novo nó se torna o anterior para a próxima iteração
-         */
-        last_node = new_node;
+        chess_list_append_new_piece(new_board->alive_head, new_piece);
     }
 
     return new_board;
@@ -110,7 +78,7 @@ ChessPiece* chess_new_piece(char col, char row, char name, char team){
  * se não houver peça nessa casa
  */
 ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row){
-    ChessNode *current = play->alive_head.nxt;
+    ChessNode *current = play->alive_head->nxt;
     while (current != NULL){
         if (current->piece->row == row && current->piece->column == col){
             return current->piece;
@@ -300,15 +268,16 @@ void chess_apply_move(ChessBoard *play, ChessMove *move){
             piece->column = move->toCol;
             piece->row = move->toRow;
             break;
-        case CAPTURE_MOVE:
+        case CAPTURE_MOVE:{
+            ChessNode *node = chess_list_find_piece(play->alive_head, target);
             piece->movs++;
             piece->column = move->toCol;
             piece->row = move->toRow;
-            /**
-             * also remove target from alive list
-             */
+            chess_list_remove_node(node);
+            chess_list_append_node(play->not_alive_head, node);
 
             break;
+        }
         case CASTLING_MOVE:
             break;
         case EN_PASSANT_MOVE:
@@ -329,7 +298,7 @@ void chess_game_over(ChessBoard *play){
     /**
      * destruir todos os nós e peças ainda vivas
      */
-    ChessNode *current = play->alive_head.nxt;
+    ChessNode *current = play->alive_head->nxt;
     ChessNode *next = NULL;
     while (current != NULL){
         /**
@@ -355,12 +324,13 @@ void chess_game_over(ChessBoard *play){
          */
         current = next;
     }
+    chess_list_destroy_empty(play->alive_head);
+
     /**
      * destruir todos os nós e peças não vivas
      * mesma coisa de antes, só que com o 'not_alive_head'
      */
-
-    current = play->not_alive_head.nxt;
+    current = play->not_alive_head->nxt;
     next = NULL;
     while (current != NULL){
         /**
@@ -386,6 +356,7 @@ void chess_game_over(ChessBoard *play){
          */
         current = next;
     }
+    chess_list_destroy_empty(play->not_alive_head);
 
     /**
      * destruir o próprio ChessBoard

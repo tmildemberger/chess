@@ -81,6 +81,9 @@ int main(int argc, char *argv[]){
     ALLEGRO_BITMAP          *images[] = {calloc(1, sizeof (ALLEGRO_BITMAP*)),
     calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
     calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
+    calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
+    calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
+    calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
     calloc(1, sizeof (ALLEGRO_BITMAP*))};
     ALLEGRO_TIMER           *timer = NULL;
     ALLEGRO_EVENT_QUEUE     *events_qu = NULL;
