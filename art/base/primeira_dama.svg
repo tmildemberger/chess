@@ -15,8 +15,8 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
-   sodipodi:docname="primeiro_peao.svg"
-   inkscape:export-filename="/home/thiago/Programming/Allegro/Chess/art/pawn.png"
+   sodipodi:docname="primeira_dama.svg"
+   inkscape:export-filename="/home/thiago/Programming/Allegro/Chess/art/queen.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96">
   <defs
@@ -29,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="5.6"
-     inkscape:cx="21.964285"
-     inkscape:cy="38.192724"
+     inkscape:cx="25.450419"
+     inkscape:cy="44.902497"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -45,7 +45,10 @@
      inkscape:window-y="27"
      inkscape:window-maximized="1"
      inkscape:measure-start="10,21.0714"
-     inkscape:measure-end="10.3571,0" />
+     inkscape:measure-end="10.3571,0"
+     inkscape:snap-others="false"
+     inkscape:object-nodes="false"
+     inkscape:snap-nodes="false" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -63,27 +66,23 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-275.83332)">
-    <rect
-       id="rect3680"
-       width="7.6729159"
-       height="2.2489583"
-       x="6.7468748"
-       y="284.96146"
-       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.13877681"
-       rx="0.82209814"
-       ry="0.84335953" />
-    <ellipse
-       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.38514093"
-       id="path5945"
-       cx="10.583333"
-       cy="281.72031"
-       rx="3.96875"
-       ry="3.836458" />
     <path
        style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.3197048px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 4.7625,295.1479 c 0,-1.20799 1.5899623,-5.54671 3.4395833,-6.61459 h 4.7624997 c 0.114175,2.92801 1.11012,5.19856 3.439584,6.61459 -5.954694,-0.0959 -7.4880587,0 -11.641667,0 z"
        id="path5947"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.06534556px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 10.41201,277.26207 c -1.3616527,0.41796 -0.8123341,2.55698 1.097365,1.66162 -1.401026,0.0551 -1.455164,-1.38623 -1.097365,-1.66162 z"
+       id="path910"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccc" />
+    <path
+       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 7.540625,285.45281 c -1.5767613,-1.10926 -1.8520834,-5.15937 -1.8520834,-5.15937 l 2.6458333,2.64583 v -3.70416 l 1.4552083,3.43958 0.7937498,-3.96875 0.79375,3.96875 1.455208,-3.43958 v 3.54353 l 2.645834,-2.4852 c 0,0 -0.275322,4.05011 -1.852084,5.15937 -1.576761,1.10926 -4.5086547,1.10926 -6.085416,0 z"
+       id="path950"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccccc" />
   </g>
 </svg>

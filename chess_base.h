@@ -2,9 +2,9 @@
 #define CHESS_BASE_H
 
 #define PAWN 0
-#define KNIGHT 1
-#define BISHOP 2
-#define ROOK 3
+#define ROOK 1
+#define KNIGHT 2
+#define BISHOP 3
 #define QUEEN 4
 #define KING 5
 
@@ -90,8 +90,13 @@ ChessBoard* chess_new_game(void);
 ChessPiece* chess_new_piece(char col, char row, char name, char team);
 
 ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row);
-ChessMove* chess_is_valid_move(ChessBoard *play, ChessPiece *piece,
+ChessMove* chess_create_move(ChessBoard *play, ChessPiece *piece,
                                                  char toCol, char toRow);
+// ChessMove* chess_is_valid_move(ChessBoard *play, ChessPiece *piece,
+//                                                  char toCol, char toRow);
+int chess_piece_cant_move(ChessBoard *play, ChessPiece *piece);
+int chess_analize_move(ChessBoard *play, ChessPiece *piece,
+                                    char toCol, char toRow);
 void chess_apply_move(ChessBoard *play, ChessMove *move);
 
 void chess_game_over(ChessBoard *play);

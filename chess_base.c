@@ -127,8 +127,8 @@ ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row){
  * ou INVALID_MOVE se inválida, levando em conta a 
  * situação do tabuleiro que também recebe
  */
-ChessMove* chess_is_valid_move(ChessBoard *play, ChessPiece *piece,
-                                                 char toCol, char toRow){
+ChessMove* chess_create_move(ChessBoard *play, ChessPiece *piece,
+                                            char toCol, char toRow){
     /**
      * @todo: função pra ver se a peça pode se mover
      * (por enquanto só retorna sim), função pra ver se 
@@ -140,7 +140,12 @@ ChessMove* chess_is_valid_move(ChessBoard *play, ChessPiece *piece,
     if (move == NULL){
         chess_error(ALLOC_ERROR);
     }
-    if (piece == NULL){
+    if (piece == NULL 
+        || chess_piece_cant_move(play, piece) 
+        || (toCol == piece->column && toRow == piece->row)
+        || toCol < 0 || toCol > 7
+        || toRow < 0 || toRow > 7
+        || piece->team != play->turn){
         move->moveType = INVALID_MOVE;
         return move;
     }
@@ -148,8 +153,136 @@ ChessMove* chess_is_valid_move(ChessBoard *play, ChessPiece *piece,
     move->fromRow = piece->row;
     move->toCol = toCol;
     move->toRow = toRow;
-    move->moveType = NORMAL_MOVE;
+    move->moveType = chess_analize_move(play, piece, toCol, toRow);
     return move;
+}
+
+/**
+ * função retorna 1 se a peça deixa o rei
+ * em cheque ao se mover
+ */
+int chess_piece_cant_move(ChessBoard *play, ChessPiece *piece){
+    return 0;
+}
+
+int chess_analize_move(ChessBoard *play, ChessPiece *piece,
+                                    char toCol, char toRow){
+    int dx = toCol - piece->column;
+    int dy = toRow - piece->row;
+    int type = UNKNOWN_MOVE;
+    ChessPiece *target = chess_piece_in_pos(play, toCol, toRow);
+    ChessPiece *temp_en_passant = chess_piece_in_pos(play, toCol, toRow-1);
+    switch (piece->name){
+        case PAWN:
+            if (dx == 0 && dy > 0 && dy <= 2 ){
+                if (dy == 2){
+                    if (piece->movs == 0){
+                        type = NORMAL_MOVE;
+                    } else {
+                        type = INVALID_MOVE;
+                    }
+                } else {
+                    if (target == NULL){
+                        type = NORMAL_MOVE;
+                    } else {
+                        type = INVALID_MOVE;
+                    }
+                }
+            } else if (dy == 1 && piece->name == WHITE && (dx == -1 || dx == +1)){
+                // if (temp_en_passant != NULL
+                //     && temp_en_passant->name == PAWN
+                //     && temp_en_passant->movs == 1
+                //     && temp_en_passant->row == play->board_height-3){
+                //     type =
+                // }
+                if (target == NULL){
+                    type = INVALID_MOVE;
+                } else {
+                    if (target->team == piece->team){
+                        type = INVALID_MOVE;
+                    } else {
+                        type = CAPTURE_MOVE;
+                    }
+                }
+            } else if (dy == -1 && piece->name == BLACK && (dx == -1 || dx == +1)){
+                if (target == NULL){
+                    type = INVALID_MOVE;
+                } else {
+                    if (target->team == piece->team){
+                        type = INVALID_MOVE;
+                    } else {
+                        type = CAPTURE_MOVE;
+                    }
+                }
+            }
+            break;
+        case ROOK:
+            if (dx == 0 || dy == 0){
+                if (target == NULL){
+                    type = NORMAL_MOVE;
+                } else {
+                    if (target->team == piece->team){
+                        type = INVALID_MOVE;
+                    } else {
+                        type = CAPTURE_MOVE;
+                    }
+                }
+            }
+            break;
+        case KNIGHT:
+            if (dx + dy == 3 && dx * dy == 2){
+                if (target == NULL){
+                    type = NORMAL_MOVE;
+                } else {
+                    if (target->team == piece->team){
+                        type = INVALID_MOVE;
+                    } else {
+                        type = CAPTURE_MOVE;
+                    }
+                }
+            }
+            break;
+        case BISHOP:
+            if (dx == dy){
+                if (target == NULL){
+                    type = NORMAL_MOVE;
+                } else {
+                    if (target->team == piece->team){
+                        type = INVALID_MOVE;
+                    } else {
+                        type = CAPTURE_MOVE;
+                    }
+                }
+            }
+            break;
+        case QUEEN:
+            if (dx == 0 || dy == 0 || dx == dy){
+                if (target == NULL){
+                    type = NORMAL_MOVE;
+                } else {
+                    if (target->team == piece->team){
+                        type = INVALID_MOVE;
+                    } else {
+                        type = CAPTURE_MOVE;
+                    }
+                }
+            }
+            break;
+        case KING:
+            if (dx <= 1 && dy <= 1){
+                if (target == NULL){
+                    type = NORMAL_MOVE;
+                } else {
+                    if (target->team == piece->team){
+                        type = INVALID_MOVE;
+                    } else {
+                        type = CAPTURE_MOVE;
+                    }
+                }
+            }
+            break;
+    }
+    return type;
 }
 
 /**
@@ -158,14 +291,36 @@ ChessMove* chess_is_valid_move(ChessBoard *play, ChessPiece *piece,
  */
 void chess_apply_move(ChessBoard *play, ChessMove *move){
     ChessPiece *piece = chess_piece_in_pos(play, move->fromCol, move->fromRow);
+    ChessPiece *target = chess_piece_in_pos(play, move->toCol, move->toRow);
     /**
      * para cada tipo de movimento algo diferente será feito.
      * serão chamadas funções ou vai ser tudo aqui?
      */
-    if (move->moveType == NORMAL_MOVE){
-        piece->movs++;
-        piece->column = move->toCol;
-        piece->row = move->toRow;
+    switch (move->moveType){
+        case NORMAL_MOVE:
+            piece->movs++;
+            piece->column = move->toCol;
+            piece->row = move->toRow;
+            break;
+        case CAPTURE_MOVE:
+            piece->movs++;
+            piece->column = move->toCol;
+            piece->row = move->toRow;
+            /**
+             * also remove target from alive list
+             */
+
+            break;
+        case CASTLING_MOVE:
+            break;
+        case EN_PASSANT_MOVE:
+            break;
+        case PROMOTION_MOVE:
+            break;
+        case PROMOTION_PIECE:
+            break;
+        default:
+            break;
     }
 }
 
