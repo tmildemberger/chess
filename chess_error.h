@@ -18,6 +18,8 @@
 
 #define CURR_LANG PORTUGUESE
 
+#include <stdio.h>
+
 void chess_error(int);
 
 #endif

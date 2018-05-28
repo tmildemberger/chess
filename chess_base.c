@@ -1,8 +1,6 @@
 #include "chess_base.h"
 #include "chess_error.h"
 
-#include <stdlib.h>
-
 /**
  * Primeira função a ser chamada - cria um novo jogo
  */

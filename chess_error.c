@@ -1,7 +1,5 @@
 #include "chess_error.h"
 
-#include <stdio.h>
-
 const char *err_msg_pt[] = {
                     "portuguese",
                     "erro 1",

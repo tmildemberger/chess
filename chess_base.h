@@ -31,6 +31,8 @@
 #define PROMOTION_MOVE 5
 #define PROMOTION_PIECE 6
 
+#include <stdlib.h>
+
 /**
  * struct piece --- ChessPiece
  * "toda peça sabe onde está,
