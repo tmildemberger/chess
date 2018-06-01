@@ -4,6 +4,7 @@ ChessNode* chess_list_create(void){
     ChessNode *head = calloc(1, sizeof (ChessNode));
     ChessNode *tail = calloc(1, sizeof (ChessNode));
     head->prv = tail;
+    head->nxt = tail;    
     tail->prv = head;
     return head;
 }
@@ -40,7 +41,7 @@ void chess_list_destroy_empty(ChessNode *head){
 
 ChessNode* chess_list_find_piece(ChessNode *head, ChessPiece *piece){
     ChessNode *node = head->nxt;
-    while (node != NULL)
+    while (node != head->prv)
         if (node->piece == piece)
             break;
         else 
@@ -49,14 +50,14 @@ ChessNode* chess_list_find_piece(ChessNode *head, ChessPiece *piece){
 }
 
 void chess_list_remove_node(ChessNode *node){
-    if (node->nxt != NULL){
+    // if (node->nxt != NULL){
         node->prv->nxt = node->nxt;
         node->nxt->prv = node->prv;
         node->nxt = NULL;
         node->prv = NULL;
-    } else {
-        node->prv->nxt = NULL;
-        node->prv = NULL;
-    }
+    // } else {
+    //     node->prv->nxt = NULL;
+    //     node->prv = NULL;
+    // }
     free(node);
 }

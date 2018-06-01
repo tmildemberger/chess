@@ -28,15 +28,25 @@ int main(int argc, char *argv[]){
     chess_apply_move(match, mv);
     chess_destroy_move(mv);
 
+    pice = chess_piece_in_pos(match, 0, 6);
+    mv = chess_create_move(match, pice, 0, 5);
+    chess_apply_move(match, mv);
+    chess_destroy_move(mv);
+
     pice = chess_piece_in_pos(match, 0, 3);
     mv = chess_create_move(match, pice, 0, 4);
     chess_apply_move(match, mv);
     chess_destroy_move(mv);
 
-    // pice = chess_piece_in_pos(match, 0, 0);
-    // mv = chess_create_move(match, pice, 0, 3);
-    // chess_apply_move(match, mv);
-    // chess_destroy_move(mv);
+    pice = chess_piece_in_pos(match, 1, 6);
+    mv = chess_create_move(match, pice, 1, 4);
+    chess_apply_move(match, mv);
+    chess_destroy_move(mv);
+
+    pice = chess_piece_in_pos(match, 0, 0);
+    mv = chess_create_move(match, pice, 0, 3);
+    chess_apply_move(match, mv);
+    chess_destroy_move(mv);
 
     int black = 0;
 
@@ -86,13 +96,7 @@ int main(int argc, char *argv[]){
     ALLEGRO_DISPLAY         *display;// = NULL;
     ALLEGRO_DISPLAY_MODE    disp_data;
     ALLEGRO_TRANSFORM       transform;
-    ALLEGRO_BITMAP          *images[] = {calloc(1, sizeof (ALLEGRO_BITMAP*)),
-    calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
-    calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
-    calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
-    calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
-    calloc(1, sizeof (ALLEGRO_BITMAP*)), calloc(1, sizeof (ALLEGRO_BITMAP*)),
-    calloc(1, sizeof (ALLEGRO_BITMAP*))};
+    ALLEGRO_BITMAP         **images = calloc(12, sizeof (ALLEGRO_BITMAP*));
     ALLEGRO_TIMER           *timer = NULL;
     ALLEGRO_EVENT_QUEUE     *events_qu = NULL;
     ALLEGRO_BITMAP          *table = NULL;
@@ -198,12 +202,26 @@ int main(int argc, char *argv[]){
 
     ALLEGRO_COLOR light_square_color = al_map_rgb(6, 27, 56);//(43, 74, 111);//(13, 77, 77);
     al_set_target_bitmap(table);
+    al_clear_to_color(al_map_rgb(0,0,0));
 
-    // al_identity_transform(&transform);)
+    al_identity_transform(&transform);
+    al_translate_transform(&transform, 1, 1);
+    al_use_transform(&transform);
+    al_draw_line(-0.5, -0.5, -0.5, 640.5, light_square_color, 1.0);
+    al_draw_line(-0.5, -0.5, 640.5, -0.5, light_square_color, 1.0);
+    al_draw_line(-0.5, 640.5, 640.5, 640.5, light_square_color, 1.0);
+    al_draw_line(640.5, -0.5, 640.5, 640.5, light_square_color, 1.0);
+    // al_identity_transform(&transform);
     // al_translate_transform(&transform, 1, 1);
     // al_use_transform(&transform);
 
-    al_clear_to_color(al_map_rgb(0,0,0));
+    // al_draw_line(0.5, 0.5, 0.5, 641.5, light_square_color, 1.0);
+    // al_draw_line(0.5, 0.5, 641.5, 0.5, light_square_color, 1.0);
+    // al_draw_line(0.5, 641.5, 641.5, 641.5, light_square_color, 1.0);
+    // al_draw_line(641.5, 0.5, 641.5, 641.5, light_square_color, 1.0);
+    // al_identity_transform(&transform);
+    // al_translate_transform(&transform, -1, -1);
+    // al_use_transform(&transform);
 
     // int i, 
     black = 0;
@@ -217,33 +235,87 @@ int main(int argc, char *argv[]){
         }
         if (i%8==7) black = !black;
 
-        ChessPiece *pccc = chess_piece_in_pos(match, i%8, i/8);
-        if (pccc != NULL){
-            al_draw_bitmap(images[pccc->name+6*pccc->team], i%8*80., i/8*80., 0);
-        }
+        // ChessPiece *pccc = chess_piece_in_pos(match, i%8, i/8);
+        // if (pccc != NULL){
+        //     al_draw_bitmap(images[pccc->name+6*pccc->team], i%8*80., i/8*80., 0);
+        // }
     }
 
     al_set_target_backbuffer(display);
 
-    al_clear_to_color(al_map_rgb(0,0,0));    
+    int go_away = 0;
+    int redraw = 0;
+    int draw_pieces = 0;
 
-    al_identity_transform(&transform);
-    al_translate_transform(&transform, (disp_data.width-640)/2, (disp_data.height-640)/2);
-    al_use_transform(&transform);
+    al_start_timer(timer);
 
-    al_draw_bitmap(table, 0, 0, 0);
+    while (!go_away){
+        ALLEGRO_EVENT event;
+        al_wait_for_event(events_qu, &event);
+        
+        if (event.type == ALLEGRO_EVENT_TIMER)
+            redraw = 1;
+        else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+            go_away = 1;
+        else if (event.type == ALLEGRO_EVENT_KEY_DOWN){
+            switch (event.keyboard.keycode){
+                case ALLEGRO_KEY_SPACE:
+                    draw_pieces = 1;
+            }
+        } else if (event.type == ALLEGRO_EVENT_KEY_UP){
+            switch (event.keyboard.keycode){
+                case ALLEGRO_KEY_SPACE:
+                    draw_pieces = 0;
+                    break;
+                case ALLEGRO_KEY_ESCAPE:
+                    go_away = 1;
+                    break;
+                default:
+                    break;
+            }
+        }
 
-    al_draw_line(-0.5, -0.5, -0.5, 640.5, light_square_color, 1.0);
-    al_draw_line(-0.5, -0.5, 640.5, -0.5, light_square_color, 1.0);
-    al_draw_line(-0.5, 640.5, 640.5, 640.5, light_square_color, 1.0);
-    al_draw_line(640.5, -0.5, 640.5, 640.5, light_square_color, 1.0);
+        if (redraw && al_is_event_queue_empty(events_qu)){
+            al_clear_to_color(al_map_rgb(0,0,0));    
 
-    al_identity_transform(&transform);
-    al_use_transform(&transform);
+            al_identity_transform(&transform);
+            al_translate_transform(&transform, (disp_data.width-640)/2, (disp_data.height-640)/2);
+            al_use_transform(&transform);
 
-    al_flip_display();
+            al_draw_bitmap(table, 0, 0, 0);
 
-    al_rest(7);
+            if (draw_pieces){
+                ChessNode *curr_node = match->alive_head->nxt;
+                while (curr_node != match->alive_head->prv){
+                    al_draw_bitmap(images[curr_node->piece->name + 6*curr_node->piece->team],
+                                    (curr_node->piece->column)*80., (match->board_height-1-curr_node->piece->row)*80., 0);
+                    curr_node = curr_node->nxt;
+                }
+            }
+
+            al_identity_transform(&transform);
+            al_use_transform(&transform);
+
+            al_flip_display();
+            redraw = 0;
+        }
+    }
+
+    // al_clear_to_color(al_map_rgb(0,0,0));    
+
+    // al_identity_transform(&transform);
+    // al_translate_transform(&transform, (disp_data.width-640)/2, (disp_data.height-640)/2);
+    // al_use_transform(&transform);
+
+    // al_draw_bitmap(table, 0, 0, 0);
+
+
+    // al_identity_transform(&transform);
+    // al_use_transform(&transform);
+
+    // al_flip_display();
+
+    // al_rest(7);
     
     al_destroy_timer(timer);
     al_destroy_display(display);

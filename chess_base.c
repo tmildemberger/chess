@@ -79,7 +79,7 @@ ChessPiece* chess_new_piece(char col, char row, char name, char team){
  */
 ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row){
     ChessNode *current = play->alive_head->nxt;
-    while (current != NULL){
+    while (current != play->alive_head->prv){
         if (current->piece->row == row && current->piece->column == col){
             return current->piece;
         }
@@ -319,6 +319,11 @@ void chess_apply_move(ChessBoard *play, ChessMove *move){
      * para cada tipo de movimento algo diferente será feito.
      * serão chamadas funções ou vai ser tudo aqui?
      */
+    if (move->moveType >= NORMAL_MOVE && move->moveType <= PROMOTION_PIECE){
+        play->movements++;
+        play->turn++;
+        play->turn %= 2;
+    }
     switch (move->moveType){
         case NORMAL_MOVE:
             piece->movs++;
@@ -357,7 +362,7 @@ void chess_game_over(ChessBoard *play){
      */
     ChessNode *current = play->alive_head->nxt;
     ChessNode *next = NULL;
-    while (current != NULL){
+    while (current != play->alive_head->prv){
         /**
          * desde já guarda o endereço do próximo nó
          */
@@ -389,7 +394,7 @@ void chess_game_over(ChessBoard *play){
      */
     current = play->not_alive_head->nxt;
     next = NULL;
-    while (current != NULL){
+    while (current != play->not_alive_head->prv){
         /**
          * desde já guarda o endereço do próximo nó
          */
