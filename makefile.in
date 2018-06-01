@@ -2,6 +2,7 @@
 #os = linux || windwos
 #obj_ext = .o || .obj
 #exe_ext =  || .exe
+#GCC_PATH if windows
 #ALLEG_INC
 #ALLEG_LIB
 
@@ -16,6 +17,12 @@ CFLAGS = $(options) -Wall $(ALLEG_INC)
 LDFLAGS = $(ALLEG_LIB)
 EXEC = $(proj)$(exe_ext)
 TEMPS = $(dep)
+
+ifeq ($(os),windows)
+	CC = $(GCC_PATH)\gcc
+	CXX = $(GCC_PATH)\g++
+	CPP = $(GCC_PATH)\cpp
+endif
 
 build: clean greetings $(EXEC) ok
 

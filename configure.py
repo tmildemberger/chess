@@ -1,5 +1,7 @@
 import sys
 import platform
+import subprocess
+import locale
 
 debug = True
 optimizate = False
@@ -12,8 +14,11 @@ args = sys.argv[1:]
 lib_path_option = False
 inc_path_option = False
 
-lib_path = ""
-inc_path = ""
+options_str = ["--gcc-path=", "--alleg-inc-path=", "--alleg-lib-path="]
+options_v = ["", "", ""]
+
+##lib_path = ""
+##inc_path = ""
 
 for arg in args:
     if arg == "--test-ok":
@@ -38,16 +43,14 @@ options:
 be good\
         """)
         exit(0)
-    elif arg == "--alleg-inc-path":
-        inc_path_option = True
-    elif arg == "--alleg-lib-path":
-        lib_path_option = True
-    elif inc_path_option == True:
-        inc_path_option = False
-        inc_path = arg
-    elif lib_path_option == True:
-        lib_path_option  = False
-        lib_path = arg
+    else:
+        for opt in options_str:
+            if arg.startswith(opt):
+                options_v[options_str.index(opt)] = arg[arg.index('=')+1:]
+                if options_v[options_str.index(opt)][-1] != "\\":
+                    options_v[options_str.index(opt)] += "\\"
+##                print(options_v)
+  
 
 print('generating makefile...')
 mk = open("makefile", "w")
@@ -74,14 +77,19 @@ if platform.machine().endswith("64"):
         mk.write("os = windows\n")
         mk.write("exe_ext = .exe\n")
         mk.write("obj_ext = .obj\n")
-        if lib_path == "":
-            mk.write("ALLEG_LIB = -LE:\\Documents\\coisas_uteis\\mingw64\\allegro\\lib -lallegro_monolith-debug-static -ljpeg -ldumb -lFLAC -lfreetype -lvorbisfile -lvorbis -logg -lphysfs -lpng16 -lzlib -ldsound -lgdiplus -luuid -lkernel32 -lwinmm -lpsapi -lopengl32 -lglu32 -luser32 -lcomdlg32 -lgdi32 -lshell32 -lole32 -ladvapi32 -lws2_32 -lshlwapi -static-libstdc++ -static-libgcc\n")
-        else:
-            mk.write("ALLEG_LIB = -L" + lib_path + " -lallegro_monolith-debug-static -ljpeg -ldumb -lFLAC -lfreetype -lvorbisfile -lvorbis -logg -lphysfs -lpng16 -lzlib -ldsound -lgdiplus -luuid -lkernel32 -lwinmm -lpsapi -lopengl32 -lglu32 -luser32 -lcomdlg32 -lgdi32 -lshell32 -lole32 -ladvapi32 -lws2_32 -lshlwapi -static-libstdc++ -static-libgcc\n")
-        if inc_path == "":
-            mk.write("ALLEG_INC = -IE:\\Documents\\coisas_uteis\\mingw64\\allegro\\include\n")
-        else:
-            mk.write("ALLEG_INC = -I" + inc_path + "\n")
+##        print(options_v[0])
+        if options_v[0] == "":
+            out = subprocess.run(["where", "gcc"], stdout=subprocess.PIPE,
+encoding=locale.getpreferredencoding(False)).stdout.splitlines()[0].split("\\")
+            options_v[0] = "\\".join(out[:-2]) + "\\"
+        if options_v[1] == "":
+            options_v[1] = options_v[0] + "allegro\\include"
+        if options_v[2] == "":
+            options_v[2] = options_v[0] + "allegro\\lib"
+        mk.write("NULL_STR =\n")
+        mk.write("GCC_PATH = " + options_v[0] + "bin\\$(NULL_STR)\n")
+        mk.write("ALLEG_INC = -I" + options_v[1] + "\n")
+        mk.write("ALLEG_LIB = -L" + options_v[2] + " -lallegro_monolith-debug-static -ljpeg -ldumb -lFLAC -lfreetype -lvorbisfile -lvorbis -logg -lphysfs -lpng16 -lzlib -ldsound -lgdiplus -luuid -lkernel32 -lwinmm -lpsapi -lopengl32 -lglu32 -luser32 -lcomdlg32 -lgdi32 -lshell32 -lole32 -ladvapi32 -lws2_32 -lshlwapi -static-libstdc++ -static-libgcc\n")
         print('64 bit windows system detected')
 
     else:
