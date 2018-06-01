@@ -1,10 +1,8 @@
 #include <stdio.h>
-#include "allegro5/allegro.h"
-#include "allegro5/allegro_image.h"
-#include "allegro5/allegro_primitives.h"
 
 #include "chess_base.h"
 #include "chess_error.h"
+#include "chess_render.h"
 
 const float     width   =   640;
 const float     height  =   640;
@@ -25,11 +23,21 @@ int main(int argc, char *argv[]){
     int i;
     int j;
 
-    ChessPiece *pice = chess_piece_in_pos(match, 1, 1);
-    ChessMove *mv = chess_create_move(match, pice, 1, 3);
-    if (mv->moveType != INVALID_MOVE)
-        chess_apply_move(match, mv);
+    ChessPiece *pice = chess_piece_in_pos(match, 0, 1);
+    ChessMove *mv = chess_create_move(match, pice, 0, 3);
+    chess_apply_move(match, mv);
     chess_destroy_move(mv);
+
+    pice = chess_piece_in_pos(match, 0, 3);
+    mv = chess_create_move(match, pice, 0, 4);
+    chess_apply_move(match, mv);
+    chess_destroy_move(mv);
+
+    // pice = chess_piece_in_pos(match, 0, 0);
+    // mv = chess_create_move(match, pice, 0, 3);
+    // chess_apply_move(match, mv);
+    // chess_destroy_move(mv);
+
     int black = 0;
 
     for (i = match->board_height-1; i >= 0 ; i--){
@@ -75,7 +83,7 @@ int main(int argc, char *argv[]){
 
 
     // return 0;
-    ALLEGRO_DISPLAY         *display = NULL;
+    ALLEGRO_DISPLAY         *display;// = NULL;
     ALLEGRO_DISPLAY_MODE    disp_data;
     ALLEGRO_TRANSFORM       transform;
     ALLEGRO_BITMAP          *images[] = {calloc(1, sizeof (ALLEGRO_BITMAP*)),
@@ -247,6 +255,54 @@ int main(int argc, char *argv[]){
 
 
     chess_game_over(match);
+
+
+
+
+
+
+
+    // chess_init_new_game();
+
+    // chess_init_render_pack();
+
+    // chess_init_timer_and_events();
+
+    // chess_bind_viewable_objs();
+
+    // chess_draw_base_board();
+
+    // while (!go_away){
+    //     ALLEGRO_EVENT event;
+    //     al_wait_for_event(queue, &event);
+    //     chess_handle_event(&event);
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     return 0;
 }

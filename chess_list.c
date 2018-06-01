@@ -49,8 +49,14 @@ ChessNode* chess_list_find_piece(ChessNode *head, ChessPiece *piece){
 }
 
 void chess_list_remove_node(ChessNode *node){
-    node->prv->nxt = node->nxt;
-    node->nxt->prv = node->prv;
-    node->nxt = NULL;
-    node->prv = NULL;
+    if (node->nxt != NULL){
+        node->prv->nxt = node->nxt;
+        node->nxt->prv = node->prv;
+        node->nxt = NULL;
+        node->prv = NULL;
+    } else {
+        node->prv->nxt = NULL;
+        node->prv = NULL;
+    }
+    free(node);
 }

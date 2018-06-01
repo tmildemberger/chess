@@ -16,7 +16,7 @@
    id="svg8"
    inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
    sodipodi:docname="primeiro_rei.svg"
-   inkscape:export-filename="/home/thiago/Programming/Allegro/Chess/art/king.png"
+   inkscape:export-filename="/home/thiago/Programming/Allegro/Chess/art/king_b.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96">
   <defs
@@ -70,13 +70,13 @@
      id="layer1"
      transform="translate(0,-275.83332)">
     <path
-       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.3197048px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#553602;fill-opacity:1;stroke:none;stroke-width:0.3197048px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 4.7625,295.1479 c 0,-1.20799 1.5899623,-5.54671 3.4395833,-6.61459 h 4.7624997 c 0.114175,2.92801 1.11012,5.19856 3.439584,6.61459 -5.954694,-0.0959 -7.4880587,0 -11.641667,0 z"
        id="path5947"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccc" />
     <path
-       style="fill:#1c4864;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+       style="fill:#553602;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
        d="m 7.9374999,285.22603 c 0,-1.33599 -0.3683316,-2.05078 -1.3229166,-3.70417 2.0626962,-0.55269 5.8959007,-0.54705 7.9374997,0 -0.95206,1.64902 -1.322916,2.37232 -1.322916,3.70417 z"
        id="path971"
        inkscape:connector-curvature="0"
@@ -209,7 +209,7 @@
        sodipodi:nodetypes="cccc"
        inkscape:transform-center-y="0.55350221" />
     <path
-       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#553602;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 9.7895833,281.12499 c 0.1322916,-0.48507 0.2645827,-0.97014 0.3968747,-1.45521 -0.3968749,0.0441 -0.7937498,0.0882 -1.1906247,0.13229 0,-0.46302 0,-0.92604 0,-1.38906 0.3968749,0.0373 0.7937498,0.0747 1.1906247,0.112 -0.06615,-0.32397 -0.132291,-0.64793 -0.1984372,-0.9719 0.3968752,0 0.7937502,0 1.1906252,0 -0.06615,0.3351 -0.132292,0.6702 -0.198438,1.0053 0.398666,-0.0485 0.797332,-0.0969 1.195998,-0.1454 -0.0018,0.46302 -0.0036,0.92604 -0.0054,1.38906 -0.396875,-0.0441 -0.79375,-0.0882 -1.190625,-0.13229 0.132292,0.48508 0.264583,0.97016 0.396875,1.45524 -0.529158,-1e-5 -1.058315,-2e-5 -1.5874727,-3e-5 z"
        id="path2598"
        inkscape:connector-curvature="0"

@@ -102,6 +102,11 @@ int chess_piece_cant_move(ChessBoard *play, ChessPiece *piece);
 int chess_analize_move(ChessBoard *play, ChessPiece *piece,
                                     char toCol, char toRow);
 void chess_apply_move(ChessBoard *play, ChessMove *move);
+int chess_squares_satifies(ChessBoard *play, char fromCol, char fromRow,
+                            char toCol, char toRow, 
+                            int (*func)(ChessBoard*, char, char));
+int chess_empty_square(ChessBoard* play, char col, char row);
+int chess_safe_square(ChessBoard* play, char col, char row);
 
 void chess_game_over(ChessBoard *play);
 void chess_destroy_piece(ChessPiece *pic);

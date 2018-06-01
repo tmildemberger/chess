@@ -16,7 +16,7 @@
    id="svg8"
    inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
    sodipodi:docname="primeira_dama.svg"
-   inkscape:export-filename="/home/thiago/Programming/Allegro/Chess/art/queen.png"
+   inkscape:export-filename="/home/thiago/Programming/Allegro/Chess/art/queen_b.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96">
   <defs
@@ -67,19 +67,19 @@
      id="layer1"
      transform="translate(0,-275.83332)">
     <path
-       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.3197048px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#553602;fill-opacity:1;stroke:none;stroke-width:0.3197048px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 4.7625,295.1479 c 0,-1.20799 1.5899623,-5.54671 3.4395833,-6.61459 h 4.7624997 c 0.114175,2.92801 1.11012,5.19856 3.439584,6.61459 -5.954694,-0.0959 -7.4880587,0 -11.641667,0 z"
        id="path5947"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccc" />
     <path
-       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.06534556px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#553602;fill-opacity:1;stroke:none;stroke-width:0.06534556px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 10.41201,277.26207 c -1.3616527,0.41796 -0.8123341,2.55698 1.097365,1.66162 -1.401026,0.0551 -1.455164,-1.38623 -1.097365,-1.66162 z"
        id="path910"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccc" />
     <path
-       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#553602;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 7.540625,285.45281 c -1.5767613,-1.10926 -1.8520834,-5.15937 -1.8520834,-5.15937 l 2.6458333,2.64583 v -3.70416 l 1.4552083,3.43958 0.7937498,-3.96875 0.79375,3.96875 1.455208,-3.43958 v 3.54353 l 2.645834,-2.4852 c 0,0 -0.275322,4.05011 -1.852084,5.15937 -1.576761,1.10926 -4.5086547,1.10926 -6.085416,0 z"
        id="path950"
        inkscape:connector-curvature="0"

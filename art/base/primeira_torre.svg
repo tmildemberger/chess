@@ -16,7 +16,7 @@
    id="svg8"
    inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
    sodipodi:docname="primeira_torre.svg"
-   inkscape:export-filename="/home/thiago/Programming/Allegro/Chess/art/rook.png"
+   inkscape:export-filename="/home/thiago/Programming/Allegro/Chess/art/rook_b.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96">
   <defs
@@ -29,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="5.6"
-     inkscape:cx="18.408356"
-     inkscape:cy="38.36355"
+     inkscape:cx="20.551213"
+     inkscape:cy="36.577836"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -67,13 +67,13 @@
      id="layer1"
      transform="translate(0,-275.83332)">
     <path
-       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.3197048px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#553602;fill-opacity:1;stroke:none;stroke-width:0.3197048px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 4.7625,295.1479 c 0,-1.20799 1.5899623,-5.54671 3.4395833,-6.61459 h 4.7624997 c 0.114175,2.92801 1.11012,5.19856 3.439584,6.61459 -5.954694,-0.0959 -7.4880587,0 -11.641667,0 z"
        id="path5947"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccc" />
     <path
-       style="fill:#1c4864;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#553602;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 6.3547247,283.18023 c 0.060128,-1.54473 0.4030189,-1.02614 -0.1042796,-3.11663 1.0518537,0.13009 1.7084933,0.0227 2.5007345,5e-5 0.1307829,0.78049 0.2464759,1.35439 0.2223966,2.05357 0.590132,0.0377 0.9899606,0.0298 1.3735218,0 0.0056,-0.644 -0.244441,-1.28437 -0.141741,-2.3151 0.57517,0.0559 1.294257,0.11308 1.889881,0 -0.01859,0.64287 0.01048,1.61687 0,2.36235 0.273001,0.084 0.388457,0.084 0.755952,0 -0.01048,-1.12345 0.06882,-1.13597 0.06682,-2.12611 0.801153,-0.0452 0.741601,-0.12533 1.72857,-0.0945 0.04203,1.49549 0.0464,1.51138 0.09449,3.30729 -1.463813,0.9927 -1.464658,1.7481 -1.559152,3.1655 H 7.7012647 c -0.062086,-1.5487 0.081614,-2.44764 -1.34654,-3.23642 z"
        id="path4517"
        inkscape:connector-curvature="0"

@@ -138,12 +138,16 @@ int chess_analize_move(ChessBoard *play, ChessPiece *piece,
     int type = UNKNOWN_MOVE;
     ChessPiece *target = chess_piece_in_pos(play, toCol, toRow);
     ChessPiece *temp_en_passant = chess_piece_in_pos(play, toCol, toRow-1);
+    chess_list_remove_node(chess_list_find_piece(play->alive_head, piece));
     switch (piece->name){
         case PAWN:
-            if (dx == 0 && dy > 0 && dy <= 2 ){
-                if (dy == 2){
+            if (dx == 0 && dy >= -2 && dy <= 2 ){
+                if (dy == 2 || dy == -2){
                     if (piece->movs == 0){
-                        type = NORMAL_MOVE;
+                        if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                            type = NORMAL_MOVE;
+                        else 
+                            type = INVALID_MOVE;
                     } else {
                         type = INVALID_MOVE;
                     }
@@ -155,14 +159,15 @@ int chess_analize_move(ChessBoard *play, ChessPiece *piece,
                     }
                 }
             } else if (dy == 1 && piece->name == WHITE && (dx == -1 || dx == +1)){
-                // if (temp_en_passant != NULL
-                //     && temp_en_passant->name == PAWN
-                //     && temp_en_passant->movs == 1
-                //     && temp_en_passant->row == play->board_height-3){
-                //     type =
-                // }
                 if (target == NULL){
-                    type = INVALID_MOVE;
+                    // if (temp_en_passant != NULL
+                    //     && temp_en_passant->name == PAWN
+                    //     && temp_en_passant->movs == 1
+                    //     && temp_en_passant->row == play->board_height-4){
+                    //     type = EN_PASSANT_MOVE;
+                    // } else {
+                        type = INVALID_MOVE;
+                    // }
                 } else {
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
@@ -172,7 +177,14 @@ int chess_analize_move(ChessBoard *play, ChessPiece *piece,
                 }
             } else if (dy == -1 && piece->name == BLACK && (dx == -1 || dx == +1)){
                 if (target == NULL){
-                    type = INVALID_MOVE;
+                    // if (temp_en_passant != NULL
+                    //     && temp_en_passant->name == PAWN
+                    //     && temp_en_passant->movs == 1
+                    //     && temp_en_passant->row == 3){
+                    //     type = EN_PASSANT_MOVE;
+                    // } else {
+                        type = INVALID_MOVE;
+                    // }
                 } else {
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
@@ -185,12 +197,24 @@ int chess_analize_move(ChessBoard *play, ChessPiece *piece,
         case ROOK:
             if (dx == 0 || dy == 0){
                 if (target == NULL){
-                    type = NORMAL_MOVE;
+                    /**
+                     * talvez a função saiba andar sozinha
+                     * se o x ainda é diferente, continuar mudando,
+                     * se já é igual, mudar só o outro
+                     * o mesmmo para o y
+                     */
+                    if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                        type = NORMAL_MOVE;
+                    else 
+                        type = INVALID_MOVE;
                 } else {
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
                     } else {
-                        type = CAPTURE_MOVE;
+                        if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                            type = CAPTURE_MOVE;
+                        else 
+                            type = INVALID_MOVE;
                     }
                 }
             }
@@ -211,12 +235,18 @@ int chess_analize_move(ChessBoard *play, ChessPiece *piece,
         case BISHOP:
             if (dx == dy){
                 if (target == NULL){
-                    type = NORMAL_MOVE;
+                    if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                        type = NORMAL_MOVE;
+                    else 
+                        type = INVALID_MOVE;
                 } else {
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
                     } else {
-                        type = CAPTURE_MOVE;
+                        if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                            type = CAPTURE_MOVE;
+                        else 
+                            type = INVALID_MOVE;
                     }
                 }
             }
@@ -224,18 +254,44 @@ int chess_analize_move(ChessBoard *play, ChessPiece *piece,
         case QUEEN:
             if (dx == 0 || dy == 0 || dx == dy){
                 if (target == NULL){
-                    type = NORMAL_MOVE;
+                    if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                        type = NORMAL_MOVE;
+                    else 
+                        type = INVALID_MOVE;
                 } else {
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
                     } else {
-                        type = CAPTURE_MOVE;
+                        if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                            type = CAPTURE_MOVE;
+                        else 
+                            type = INVALID_MOVE;
                     }
                 }
             }
             break;
         case KING:
-            if (dx <= 1 && dy <= 1){
+            if (dy == 0 && (dx == 2 || dx == -2)){
+                if (target == NULL){
+                    ChessPiece *rook = chess_piece_in_pos(play, 
+                                        dx == 2 ? play->board_width-1 : 0, piece->row);
+                    if (rook != NULL){
+                        if (rook->movs == 0 && piece->movs == 0){
+                            if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square)){
+                                chess_list_remove_node(chess_list_find_piece(play->alive_head, rook));
+                                if (chess_squares_satifies(play, rook->column, rook->row, dx == 2 ? toCol-1 : toCol+1, toRow, chess_empty_square)){
+                                    if (chess_safe_square(play, toCol, toRow)
+                                        && chess_squares_satifies(play, piece->column, piece->row,
+                                                            toCol, toRow, chess_safe_square)){
+                                        type = CASTLING_MOVE;
+                                    }
+                                }
+                                chess_list_append_new_piece(play->alive_head, rook);
+                            }
+                        }
+                    }
+                }
+            } else if (dx <= 1 && dy <= 1){
                 if (target == NULL){
                     type = NORMAL_MOVE;
                 } else {
@@ -248,6 +304,7 @@ int chess_analize_move(ChessBoard *play, ChessPiece *piece,
             }
             break;
     }
+    chess_list_append_new_piece(play->alive_head, piece);
     return type;
 }
 
@@ -269,12 +326,12 @@ void chess_apply_move(ChessBoard *play, ChessMove *move){
             piece->row = move->toRow;
             break;
         case CAPTURE_MOVE:{
-            ChessNode *node = chess_list_find_piece(play->alive_head, target);
+            // ChessNode *node = chess_list_find_piece(play->alive_head, target);
             piece->movs++;
             piece->column = move->toCol;
             piece->row = move->toRow;
-            chess_list_remove_node(node);
-            chess_list_append_node(play->not_alive_head, node);
+            chess_list_remove_node(chess_list_find_piece(play->alive_head, target));
+            chess_list_append_new_piece(play->not_alive_head, target);
 
             break;
         }
@@ -373,4 +430,33 @@ void chess_destroy_piece(ChessPiece *pic){
 
 void chess_destroy_move(ChessMove *mov){
     free(mov);
+}
+
+int chess_empty_square(ChessBoard* play, char col, char row){
+    return (chess_piece_in_pos(play, col, row) == NULL);
+}
+
+int chess_safe_square(ChessBoard* play, char col, char row){
+    return 1;
+}
+
+int chess_squares_satifies(ChessBoard *play, char fromCol, char fromRow,
+                            char toCol, char toRow, 
+                            int (*func)(ChessBoard*, char, char)){
+    if (fromCol == toCol && fromRow == toRow)
+        return 1;
+    if (!func(play, fromCol, fromRow))
+        return 0;
+    int incX = 0;
+    int incY = 0;
+    if (toCol - fromCol < 0)
+        incX = -1;
+    else if (toCol - fromCol > 0)
+        incX = 1;
+    if (toRow - fromRow < 0)
+        incY = -1;
+    else if (toRow - fromRow > 0)
+        incY = 1;
+    return chess_squares_satifies(play, fromCol+incX, fromRow+incY,
+                                    toCol, toRow, func);
 }
