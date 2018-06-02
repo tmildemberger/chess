@@ -59,6 +59,12 @@ typedef struct move{
     char toCol;
     int moveType;
 } ChessMove;
+
+typedef struct visual_piece {
+    ChessPiece *piece;
+    int x;
+    int y;
+} ChessVisualPiece;
  
 /**
  * struct node --- ChessNode
@@ -69,6 +75,7 @@ typedef struct node{
     union{
         ChessPiece *piece;
         ChessMove *move;
+        ChessVisualPiece *vpiece;
     };
     struct node *nxt;
     struct node *prv;

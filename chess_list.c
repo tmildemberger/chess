@@ -15,6 +15,12 @@ void chess_list_append_new_piece(ChessNode *head, ChessPiece *piece){
     chess_list_append_node(head, new_node);
 }
 
+void chess_list_append_new_v_piece(ChessNode *head, ChessVisualPiece *vpiece){
+    ChessNode *new_node = calloc(1, sizeof (ChessNode));
+    new_node->vpiece = vpiece;
+    chess_list_append_node(head, new_node);
+}
+
 void chess_list_append_new_move(ChessNode *head, ChessMove *move){
     ChessNode *new_node = calloc(1, sizeof (ChessNode));
     new_node->move = move;
@@ -46,18 +52,38 @@ ChessNode* chess_list_find_piece(ChessNode *head, ChessPiece *piece){
             break;
         else 
             node = node->nxt;
-    return node;
+    return (node == head->prv ? NULL : node);
 }
 
 void chess_list_remove_node(ChessNode *node){
-    // if (node->nxt != NULL){
+    if (node != NULL){
         node->prv->nxt = node->nxt;
         node->nxt->prv = node->prv;
         node->nxt = NULL;
         node->prv = NULL;
+        free(node);
+    }
     // } else {
     //     node->prv->nxt = NULL;
     //     node->prv = NULL;
-    // }
-    free(node);
+}
+
+ChessVisualPiece* chess_list_find_v_piece_with_piece(ChessNode *head, ChessPiece *piece){
+    ChessNode *node = head->nxt;
+    while (node != head->prv)
+        if (node->vpiece->piece == piece)
+            break;
+        else 
+            node = node->nxt;
+    return (node == head->prv ? NULL : node->vpiece);
+}
+
+ChessNode* chess_list_find_v_piece(ChessNode *head, ChessVisualPiece *vpiece){
+    ChessNode *node = head->nxt;
+    while (node != head->prv)
+        if (node->vpiece == vpiece)
+            break;
+        else 
+            node = node->nxt;
+    return (node == head->prv ? NULL : node);
 }

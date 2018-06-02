@@ -3,6 +3,7 @@
 #include "chess_base.h"
 #include "chess_error.h"
 #include "chess_render.h"
+#include "chess_list.h"
 
 const float     width   =   640;
 const float     height  =   640;
@@ -15,6 +16,12 @@ const char *image_paths[] = {"art/pawn.png", "art/rook.png", "art/knight.png",
                 "art/bishop_b.png", "art/queen_b.png", "art/king_b.png"};
 const int image_paths_sz = sizeof (image_paths) / sizeof (char*);
 
+const int PIECE_WHITE_R = 28;
+const int PIECE_WHITE_G = 72;
+const int PIECE_WHITE_B = 100;
+const int PIECE_BLACK_R = 85;
+const int PIECE_BLACK_G = 54;
+const int PIECE_BLACK_B = 2;
 
 int main(int argc, char *argv[]){
     // printf("%d\n", sizeof(Piece));
@@ -100,7 +107,7 @@ int main(int argc, char *argv[]){
     ALLEGRO_TIMER           *timer = NULL;
     ALLEGRO_EVENT_QUEUE     *events_qu = NULL;
     ALLEGRO_BITMAP          *table = NULL;
-
+    ALLEGRO_BITMAP          *real_board = NULL;
 
     if (!al_init()){
         chess_error(AL_INIT_ERROR);
@@ -182,6 +189,19 @@ int main(int argc, char *argv[]){
         return AL_CREATE_BITMAP_ERROR;
     }
 
+    real_board = al_create_bitmap(disp_data.width, disp_data.height);
+    if (!real_board){
+        chess_error(AL_CREATE_BITMAP_ERROR);
+        al_destroy_timer(timer);
+        al_destroy_display(display);
+        i = image_paths_sz;
+        while (--i > 0)
+                al_destroy_bitmap(images[i]);
+        // al_destroy_bitmap(pawn_png);
+        al_destroy_bitmap(table);
+        return AL_CREATE_BITMAP_ERROR;
+    }
+
     events_qu = al_create_event_queue();
     if (!events_qu){
         chess_error(AL_CREATE_EVENT_QU_ERROR);
@@ -192,6 +212,7 @@ int main(int argc, char *argv[]){
                 al_destroy_bitmap(images[i]);
         // al_destroy_bitmap(pawn_png);
         al_destroy_bitmap(table);
+        al_destroy_bitmap(real_board);
         return AL_CREATE_EVENT_QU_ERROR;
     }
 
@@ -200,6 +221,27 @@ int main(int argc, char *argv[]){
     al_register_event_source(events_qu, al_get_mouse_event_source());
     al_register_event_source(events_qu, al_get_keyboard_event_source());
 
+    ChessNode               *visual_alive_head = NULL;
+    ChessNode               *visual_not_alive_head = NULL;
+
+    ChessNode *curr = match->alive_head->nxt;
+
+    ChessVisualPiece *vpiece = NULL;
+    visual_alive_head = chess_list_create();
+
+    while (curr != match->alive_head->prv){
+        vpiece = calloc(1, sizeof (ChessVisualPiece));
+        vpiece->piece = curr->piece;
+        vpiece->x = vpiece->piece->column*80+(disp_data.width-640)/2;
+        vpiece->y = (match->board_height-1-vpiece->piece->row)*80+(disp_data.height-640)/2;
+
+        // printf("%d %d\n", vpiece->x, vpiece->y);
+        chess_list_append_new_v_piece(visual_alive_head, vpiece);
+        curr = curr->nxt;
+    }
+
+    visual_not_alive_head = chess_list_create();
+ 
     ALLEGRO_COLOR light_square_color = al_map_rgb(6, 27, 56);//(43, 74, 111);//(13, 77, 77);
     al_set_target_bitmap(table);
     al_clear_to_color(al_map_rgb(0,0,0));
@@ -241,11 +283,20 @@ int main(int argc, char *argv[]){
         // }
     }
 
+    al_set_target_bitmap(real_board);
+            
+    al_identity_transform(&transform);
+    al_translate_transform(&transform, (disp_data.width-640)/2+1, (disp_data.height-640)/2+1);
+    al_use_transform(&transform);
+
     al_set_target_backbuffer(display);
 
     int go_away = 0;
     int redraw = 0;
     int draw_pieces = 0;
+    ChessVisualPiece *dragging = NULL;
+    int x_diff = 0;
+    int y_diff = 0;
 
     al_start_timer(timer);
 
@@ -265,7 +316,7 @@ int main(int argc, char *argv[]){
         } else if (event.type == ALLEGRO_EVENT_KEY_UP){
             switch (event.keyboard.keycode){
                 case ALLEGRO_KEY_SPACE:
-                    draw_pieces = 0;
+                    draw_pieces = 1;
                     break;
                 case ALLEGRO_KEY_ESCAPE:
                     go_away = 1;
@@ -273,28 +324,82 @@ int main(int argc, char *argv[]){
                 default:
                     break;
             }
+        } else if (event.type == ALLEGRO_EVENT_MOUSE_AXES){
+            if (dragging != NULL){
+                dragging->x = event.mouse.x + x_diff;
+                dragging->y = event.mouse.y + y_diff;
+            }
+        } else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN){
+            unsigned char r, g, b;
+            if (event.mouse.x >= (disp_data.width-640)/2 && event.mouse.x <= (disp_data.width-640)/2+640
+             && event.mouse.y >= (disp_data.height-640)/2 && event.mouse.y <= (disp_data.height-640)/2+640){
+                al_unmap_rgb(al_get_pixel(real_board, 
+                                    (event.mouse.x), 
+                                    (event.mouse.y)), &r, &g, &b);
+
+                if ((r == PIECE_BLACK_R && g == PIECE_BLACK_G && b == PIECE_BLACK_B)
+                || (r == PIECE_WHITE_R && g == PIECE_WHITE_G && b == PIECE_WHITE_B)){
+                    dragging = chess_list_find_v_piece_with_piece(visual_alive_head,
+                        chess_piece_in_pos(match,
+                        (event.mouse.x - (disp_data.width-640)/2 ) / 80,
+                        match->board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)));
+                    printf("im dragging this piece: %hhd %hhd %hhd %hhd\n", 
+                        dragging->piece->column, dragging->piece->row,
+                        dragging->piece->name, dragging->piece->team);
+                    x_diff = dragging->x - event.mouse.x;
+                    y_diff = dragging->y - event.mouse.y;
+                }
+             }
+
+        } else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP){
+            ChessPiece *last = match->not_alive_head->prv->prv->piece;
+
+            ChessMove *move = chess_create_move(match, dragging->piece, 
+                    (event.mouse.x - (disp_data.width-640)/2 ) / 80,
+                    match->board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80));
+            chess_apply_move(match, move);
+            // printf("i tried to move from %d %d to %d %d -- %d\n", move->fromCol,
+            //     move->fromRow, move->toCol, move->toRow, move->moveType);
+            printf("i tried to move from %d %d to %d %d -- %d\n", dragging->piece->column,
+                dragging->piece->row, (event.mouse.x - (disp_data.width-640)/2 ) / 80, match->board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80), move->moveType);
+            chess_destroy_move(move);
+
+            dragging->x = dragging->piece->column*80+(disp_data.width-640)/2;
+            dragging->y = (match->board_height-1-dragging->piece->row)*80+(disp_data.height-640)/2;
+
+            dragging = NULL;
+
+            if (match->not_alive_head->prv->prv->piece != last){
+                ChessVisualPiece *captured = chess_list_find_v_piece_with_piece(visual_alive_head, 
+                    match->not_alive_head->prv->prv->piece);
+
+                chess_list_remove_node(chess_list_find_v_piece(visual_alive_head, captured));
+                chess_list_append_new_v_piece(visual_not_alive_head, captured);
+            }
+
         }
 
         if (redraw && al_is_event_queue_empty(events_qu)){
-            al_clear_to_color(al_map_rgb(0,0,0));    
+            al_set_target_bitmap(real_board);
 
-            al_identity_transform(&transform);
-            al_translate_transform(&transform, (disp_data.width-640)/2, (disp_data.height-640)/2);
-            al_use_transform(&transform);
+            al_clear_to_color(al_map_rgb(0,0,0));
 
-            al_draw_bitmap(table, 0, 0, 0);
+            al_draw_bitmap(table, -1, -1, -1);
 
             if (draw_pieces){
-                ChessNode *curr_node = match->alive_head->nxt;
-                while (curr_node != match->alive_head->prv){
-                    al_draw_bitmap(images[curr_node->piece->name + 6*curr_node->piece->team],
-                                    (curr_node->piece->column)*80., (match->board_height-1-curr_node->piece->row)*80., 0);
+                ChessNode *curr_node = visual_alive_head->nxt;
+                while (curr_node != visual_alive_head->prv){
+                    al_draw_bitmap(images[curr_node->vpiece->piece->name + 6*curr_node->vpiece->piece->team],
+                                    curr_node->vpiece->x - (disp_data.width-640)/2, curr_node->vpiece->y - (disp_data.height-640)/2, 0);
                     curr_node = curr_node->nxt;
                 }
             }
 
-            al_identity_transform(&transform);
-            al_use_transform(&transform);
+            al_set_target_backbuffer(display);
+
+            al_clear_to_color(al_map_rgb(0,0,0));
+
+            al_draw_bitmap(real_board, 0, 0, 0);
 
             al_flip_display();
             redraw = 0;
@@ -323,7 +428,36 @@ int main(int argc, char *argv[]){
     while (--i > 0)
             al_destroy_bitmap(images[i]);
     al_destroy_bitmap(table);
+    al_destroy_bitmap(real_board);
     al_destroy_event_queue(events_qu);
+
+    ChessNode *current = visual_alive_head->nxt;
+    ChessNode *next = NULL;
+    while (current != visual_alive_head->prv){
+        next = current->nxt;
+
+        current->nxt = NULL;
+
+        free(current->vpiece);
+        free(current);
+
+        current = next;
+    }
+    chess_list_destroy_empty(visual_alive_head);
+
+    current = visual_not_alive_head->nxt;
+    next = NULL;
+    while (current != visual_not_alive_head->prv){
+        next = current->nxt;
+
+        current->nxt = NULL;
+
+        free(current->vpiece);
+        free(current);
+
+        current = next;
+    }
+    chess_list_destroy_empty(visual_not_alive_head);
 
 
     chess_game_over(match);
