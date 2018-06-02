@@ -107,10 +107,30 @@ print('makefile built')
 
 
 if os == "windows":
-	import subprocess
-	subprocess.call(["mkdir", "codeblocks", "2>nul"], shell=True)
-	gen = open("codeblocks\\chess.cbp", "w")
-	str = """\
+        import subprocess
+        subprocess.call(["mkdir", "codeblocks", "2>nul"], shell=True)
+        subprocess.call(["mkdir", "codeblocks\\art", "2>nul"], shell=True)
+        import glob
+        files_c = glob.glob("*.c")
+        files_h = glob.glob("*.h")
+
+        files_proj = ""
+
+        for fl in files_c:
+            files_proj += """\
+		<Unit filename="{0}">
+			<Option compilerVar="CC" />
+		</Unit>
+""".format(fl)
+
+        for fl in files_h:
+            files_proj += """\
+		<Unit filename="{0}" />
+""".format(fl)
+	
+        gen = open("codeblocks\\chess.cbp", "w")
+	
+        str = """\
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
@@ -143,7 +163,7 @@ if os == "windows":
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="E:/Documents/coisas_uteis/mingw64/allegro/include" />
+			<Add directory="{0}" />
 		</Compiler>
 		<Linker>
 			<Add option="-lallegro_monolith-debug-static" />
@@ -173,11 +193,9 @@ if os == "windows":
 			<Add option="-ladvapi32" />
 			<Add option="-lws2_32" />
 			<Add option="-lshlwapi" />
-			<Add directory="E:/Documents/coisas_uteis/mingw64/allegro/lib" />
+			<Add directory="{1}" />
 		</Linker>
-		<Unit filename="chess.c">
-			<Option compilerVar="CC" />
-		</Unit>
+{2}
 		<Extensions>
 			<code_completion />
 			<envvars />
@@ -185,14 +203,17 @@ if os == "windows":
 			<lib_finder disable_auto="1" />
 		</Extensions>
 	</Project>
-</CodeBlocks_project_file>"""
-	gen.write(str)
-	gen.close()
-	copyd = open("codeblocks\\chess.c", "w")
-	copys = open("chess.c", "r")
-	tt = copys.read()
-	copyd.write(tt)
-	copyd.close()
-	copys.close()
-	print("codeblocks project built")
-	pass
+</CodeBlocks_project_file>""".format(options_v[1], options_v[2], files_proj)
+        gen.write(str)
+        gen.close()
+##	copyd = open("codeblocks\\chess.c", "w")
+##	copys = open("chess.c", "r")
+##	tt = copys.read()
+##	copyd.write(tt)
+##	copyd.close()
+##	copys.close()
+        subprocess.call(["copy", "*.c", "codeblocks\\*.c", "/Y", "/V", "1>nul"], shell=True)
+        subprocess.call(["copy", "*.h", "codeblocks\\*.h", "/Y", "/V", "1>nul"], shell=True)
+        subprocess.call(["copy", "art\\*.*", "codeblocks\\art\\*.*", "/Y", "/V", "1>nul"], shell=True)
+        print("codeblocks project built")
+        pass
