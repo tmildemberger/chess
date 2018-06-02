@@ -108,6 +108,8 @@ print('makefile built')
 
 if os == "windows":
         import subprocess
+        subprocess.call(["del", "/S", "/F", "/Q", "codeblocks", ">nul", "2>&1"], shell=True)
+        subprocess.call(["rmdir", "/S", "/Q", "codeblocks", ">nul", "2>&1"], shell=True)
         subprocess.call(["mkdir", "codeblocks", "2>nul"], shell=True)
         subprocess.call(["mkdir", "codeblocks\\art", "2>nul"], shell=True)
         import glob
@@ -212,8 +214,9 @@ if os == "windows":
 ##	copyd.write(tt)
 ##	copyd.close()
 ##	copys.close()
-        subprocess.call(["copy", "*.c", "codeblocks\\*.c", "/Y", "/V", "1>nul"], shell=True)
-        subprocess.call(["copy", "*.h", "codeblocks\\*.h", "/Y", "/V", "1>nul"], shell=True)
-        subprocess.call(["copy", "art\\*.*", "codeblocks\\art\\*.*", "/Y", "/V", "1>nul"], shell=True)
+        subprocess.call(["copy", "*.c", "codeblocks\\*.c", "/Y", "/V", ">nul"], shell=True)
+        subprocess.call(["copy", "*.h", "codeblocks\\*.h", "/Y", "/V", ">nul"], shell=True)
+        subprocess.call(["copy", "art\\*.*", "codeblocks\\art\\*.*", "/Y", "/V", ">nul"], shell=True)
+        subprocess.call(["attrib", "+r", "codeblocks\\*.*"], shell=True)
         print("codeblocks project built")
         pass
