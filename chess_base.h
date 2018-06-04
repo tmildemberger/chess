@@ -1,38 +1,41 @@
 #ifndef CHESS_BASE_H
 #define CHESS_BASE_H
 
-#define PAWN 0
-#define ROOK 1
-#define KNIGHT 2
-#define BISHOP 3
-#define QUEEN 4
-#define KING 5
+typedef enum pieces_type {  PAWN = 0, 
+                            ROOK, 
+                            KNIGHT, 
+                            BISHOP, 
+                            QUEEN, 
+                            KING
+} PiecesType;
 
 #define WHITE 0
 #define BLACK 1
-#define WAITING_PROMOTION 2
-/**
- * ^^^^-> "terceiro estado" de um jogo:
- * ||||-> acontece depois de um movimento de
- * \\\\-> promoção, depois do qual se fica esperando
- *  \\\-> pela peça promovida para ser escolhida
- */
 
 #define TABLE_WIDTH 8
 #define TABLE_HEIGHT 8
 
-
-#define INVALID_MOVE -1
-#define UNKNOWN_MOVE 0
-#define NORMAL_MOVE 1
-#define CAPTURE_MOVE 2
-#define CASTLING_MOVE 3
-#define EN_PASSANT_MOVE 4
-#define PROMOTION_MOVE 5
-#define PROMOTION_PIECE 6
+typedef enum move_type {
+    INVALID_MOVE = 0,
+    UNKNOWN_MOVE,
+    NORMAL_MOVE,
+    CAPTURE_MOVE,
+    CASTLING_MOVE,
+    EN_PASSANT_MOVE,
+    PROMOTION_TO_ROOK,
+    PROMOTION_TO_KNIGHT,
+    PROMOTION_TO_BISHOP,
+    PROMOTION_TO_QUEEN
+} MoveType;
 
 #include "chess_error.h"
 #include <stdlib.h>
+#include <stdint.h>
+
+typedef struct square{
+    unsigned char col;
+    unsigned char row;
+} ChessSquare;
 
 /**
  * struct piece --- ChessPiece
@@ -41,11 +44,12 @@
  * e quantas vezes se moveu"
  */
 typedef struct piece{
-    char row;
-    char column;
-    char name;
-    char team;
-    int movs;
+    ChessSquare pos;
+    char heading;
+    unsigned char team : 7;
+    unsigned char alive : 1;
+    unsigned int movs;
+    PiecesType type;
 } ChessPiece;
 
 /**
@@ -53,17 +57,15 @@ typedef struct piece{
  * vê como ela facilita para fazer uma lista de jogadas
  */
 typedef struct move{
-    char fromRow;
-    char fromCol;
-    char toRow;
-    char toCol;
-    int moveType;
+    ChessSquare from;
+    ChessSquare to;
+    MoveType type;
 } ChessMove;
 
 typedef struct visual_piece {
     ChessPiece *piece;
-    int x;
-    int y;
+    unsigned int x;
+    unsigned int y;
 } ChessVisualPiece;
  
 /**
@@ -89,13 +91,24 @@ typedef struct node{
  * de quais peças estão vivas ou não
  */
 typedef struct board{
-    ChessNode *alive_head;
-    ChessNode *not_alive_head;
+    ChessNode *apieces;
     short board_width;
     short board_height;
     short movements;
     short turn;
 } ChessBoard;
+
+typedef struct move_list{
+    struct move_list *nxt;
+    unsigned int used_size;
+    unsigned int allocated_size;
+    ChessMove moves[]; 
+} ChessMoveList;
+
+typedef struct match{
+    ChessBoard board;
+    ChessMoveList *record;
+} ChessMatch;
 
 ChessBoard* chess_new_game(void);
 ChessPiece* chess_new_piece(char col, char row, char name, char team);
