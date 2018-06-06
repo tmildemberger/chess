@@ -89,14 +89,14 @@ typedef struct piece_list{
     struct piece_list *nxt;
     unsigned int used_size;
     unsigned int allocated_size;
-    ChessPiece pieces[]; 
+    ChessPiece *pieces[]; 
 } ChessPieceList;
 
 typedef struct vpiece_list{
     struct vpiece_list *nxt;
     unsigned int used_size;
     unsigned int allocated_size;
-    ChessVisualPiece vpieces[]; 
+    ChessVisualPiece *vpieces[]; 
 } ChessVPieceList;
 
 /**
@@ -120,24 +120,24 @@ typedef struct match{
 } ChessMatch;
 
 ChessMatch* chess_new_game(void);
-ChessPiece* chess_new_piece(char col, char row, char name, char team);
+ChessPiece* chess_new_piece(char col, char row, PiecesType name, char team);
 
-ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row);
-ChessMove* chess_create_move(ChessBoard *play, ChessPiece *piece,
+ChessPiece* chess_piece_in_pos(ChessMatch *play, char col, char row);
+ChessMove* chess_create_move(ChessMatch *play, ChessPiece *piece,
                                                  char toCol, char toRow);
-// ChessMove* chess_is_valid_move(ChessBoard *play, ChessPiece *piece,
+// ChessMove* chess_is_valid_move(ChessMatch *play, ChessPiece *piece,
 //                                                  char toCol, char toRow);
-int chess_piece_cant_move(ChessBoard *play, ChessPiece *piece);
-int chess_analize_move(ChessBoard *play, ChessPiece *piece,
+int chess_piece_cant_move(ChessMatch *play, ChessPiece *piece);
+int chess_analize_move(ChessMatch *play, ChessPiece *piece,
                                     char toCol, char toRow);
-void chess_apply_move(ChessBoard *play, ChessMove *move);
-int chess_squares_satifies(ChessBoard *play, char fromCol, char fromRow,
-                            char toCol, char toRow, 
-                            int (*func)(ChessBoard*, char, char));
-int chess_empty_square(ChessBoard* play, char col, char row);
-int chess_safe_square(ChessBoard* play, char col, char row);
+void chess_apply_move(ChessMatch *play, ChessMove *move);
+int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
+                            ChessSquare toSquare, 
+                            int (*func)(ChessMatch*, char, char));
+int chess_empty_square(ChessMatch* play, ChessSquare square);
+int chess_safe_square(ChessMatch* play, ChessSquare square);
 
-void chess_game_over(ChessBoard *play);
+void chess_game_over(ChessMatch *play);
 void chess_destroy_piece(ChessPiece *pic);
 void chess_destroy_move(ChessMove *move);
 

@@ -1,30 +1,31 @@
 #include "chess_base.h"
-#include "chess_list.h"
+#include "chess_piece_list.h"
+#include "chess_move_list.h"
 
 /**
  * Primeira função a ser chamada - cria um novo jogo
  */
-ChessBoard* chess_new_game(void){
+ChessMatch* chess_new_game(void){
     /**
      * por causa do calloc, o 'nxt' do 'not_alive_head' do
-     * new_board já é inicializado com NULL (lista vazia)
+     * new_match já é inicializado com NULL (lista vazia)
      */
-    ChessBoard *new_board = calloc(1, sizeof(ChessBoard));
-    if (new_board == NULL){
+    ChessMatch *new_match = calloc(1, sizeof(ChessMatch));
+    if (new_match == NULL){
         chess_error(ALLOC_ERROR);
     }
 
-    new_board->alive_head = chess_list_create();
-    new_board->not_alive_head = chess_list_create();
+    new_match->board.pieces = chess_create_new_piece_list();
+    new_match->record = chess_create_move_list();
 
     /**
      * pelo menos por enquanto o tamanho do
      * tabuleiro está fixo em oito por oito
      */
-    new_board->board_width = TABLE_WIDTH;
-    new_board->board_height = TABLE_HEIGHT;
+    new_match->board.board_width = TABLE_WIDTH;
+    new_match->board.board_height = TABLE_HEIGHT;
 
-    char pieces[16] = {ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK,
+    PiecesType pieces[16] = {ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK,
                         PAWN, PAWN, PAWN, PAWN, PAWN, PAWN, PAWN, PAWN};
     
     ChessPiece *new_piece = NULL;
@@ -36,35 +37,36 @@ ChessBoard* chess_new_game(void){
                                             pieces[i], 
                                             WHITE);
 
-        chess_list_append_new_piece(new_board->alive_head, new_piece);
+        chess_append_piece(new_match->board.pieces, new_piece);
     }
 
     for (i = 0; i < 16; i++){
         
         new_piece = chess_new_piece(        i % 8, 
-                                            new_board->board_height - i / 8 - 1, 
+                                            new_match->board.board_height - i / 8 - 1, 
                                             pieces[i], 
                                             BLACK);
 
-        chess_list_append_new_piece(new_board->alive_head, new_piece);
+        chess_append_piece(new_match->board.pieces, new_piece);        
     }
 
-    return new_board;
+    return new_match;
 }
 
 /**
  * cria uma peça com as informações enviadas
  */
-ChessPiece* chess_new_piece(char col, char row, char name, char team){
+ChessPiece* chess_new_piece(char col, char row, PiecesType name, char team){
     ChessPiece *new_piece = calloc(1, sizeof(ChessPiece));
     if (new_piece == NULL){
         chess_error(ALLOC_ERROR);
     }
 
-    new_piece->column = col;
-    new_piece->row = row;
-    new_piece->name = name;
+    new_piece->pos = (ChessSquare) { col, row };
+    new_piece->type = name;
+    new_piece->alive = 1;
     new_piece->team = team;
+    new_piece->heading = team == WHITE ? 1 : -1;
     /**
      * não é necessário inicializar a contagem de movimentos
      * da peça pois o calloc já inicializa tudo com zero
@@ -77,15 +79,9 @@ ChessPiece* chess_new_piece(char col, char row, char name, char team){
  * retorna a peça na posição enviada, e NULL
  * se não houver peça nessa casa
  */
-ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row){
-    ChessNode *current = play->alive_head->nxt;
-    while (current != play->alive_head->prv){
-        if (current->piece->row == row && current->piece->column == col){
-            return current->piece;
-        }
-        current = current->nxt;
-    }
-    return NULL;
+ChessPiece* chess_piece_in_pos(ChessMatch *play, char col, char row){
+    return chess_find_piece_in_square(play->board.pieces, 
+                                      (ChessSquare){ col, row });
 }
 
 /**
@@ -93,7 +89,7 @@ ChessPiece* chess_piece_in_pos(ChessBoard *play, char col, char row){
  * ou INVALID_MOVE se inválida, levando em conta a 
  * situação do tabuleiro que também recebe
  */
-ChessMove* chess_create_move(ChessBoard *play, ChessPiece *piece,
+ChessMove* chess_create_move(ChessMatch *play, ChessPiece *piece,
                                             char toCol, char toRow){
     /**
      * @todo: função pra ver se a peça pode se mover
@@ -127,11 +123,11 @@ ChessMove* chess_create_move(ChessBoard *play, ChessPiece *piece,
  * função retorna 1 se a peça deixa o rei
  * em cheque ao se mover
  */
-int chess_piece_cant_move(ChessBoard *play, ChessPiece *piece){
+int chess_piece_cant_move(ChessMatch *play, ChessPiece *piece){
     return 0;
 }
 
-int chess_analize_move(ChessBoard *play, ChessPiece *piece,
+int chess_analize_move(ChessMatch *play, ChessPiece *piece,
                                     char toCol, char toRow){
     int dx = toCol - piece->column;
     int dy = toRow - piece->row;
@@ -312,7 +308,7 @@ int chess_analize_move(ChessBoard *play, ChessPiece *piece,
  * no tabuleiro enviado, realiza uma jogada que se
  * presume ser válida
  */
-void chess_apply_move(ChessBoard *play, ChessMove *move){
+void chess_apply_move(ChessMatch *play, ChessMove *move){
     ChessPiece *piece = chess_piece_in_pos(play, move->fromCol, move->fromRow);
     ChessPiece *target = chess_piece_in_pos(play, move->toCol, move->toRow);
     /**
@@ -356,72 +352,11 @@ void chess_apply_move(ChessBoard *play, ChessMove *move){
 /**
  * destrói o jogo todo
  */
-void chess_game_over(ChessBoard *play){
+void chess_game_over(ChessMatch *play){
+    chess_destroy_piece_list(play->board.pieces);
+    chess_destroy_move_list(play->record);
     /**
-     * destruir todos os nós e peças ainda vivas
-     */
-    ChessNode *current = play->alive_head->nxt;
-    ChessNode *next = NULL;
-    while (current != play->alive_head->prv){
-        /**
-         * desde já guarda o endereço do próximo nó
-         */
-        next = current->nxt;
-
-        /**
-         * sempre bom limpar o valor dos ponteiros
-         * antes de liberar a memória
-         */
-        current->nxt = NULL;
-
-        /**
-         * destrói peça e nó correspondente
-         */
-        chess_destroy_piece(current->piece);
-        free(current);
-
-        /**
-         * fazer o mesmo para o próximo até que
-         * acabe a lista (marcado por NULL)
-         */
-        current = next;
-    }
-    chess_list_destroy_empty(play->alive_head);
-
-    /**
-     * destruir todos os nós e peças não vivas
-     * mesma coisa de antes, só que com o 'not_alive_head'
-     */
-    current = play->not_alive_head->nxt;
-    next = NULL;
-    while (current != play->not_alive_head->prv){
-        /**
-         * desde já guarda o endereço do próximo nó
-         */
-        next = current->nxt;
-
-        /**
-         * sempre bom limpar o valor dos ponteiros
-         * antes de liberar a memória
-         */
-        current->nxt = NULL;
-
-        /**
-         * destrói peça e nó correspondente
-         */
-        chess_destroy_piece(current->piece);
-        free(current);
-
-        /**
-         * fazer o mesmo para o próximo até que
-         * acabe a lista (marcado por NULL)
-         */
-        current = next;
-    }
-    chess_list_destroy_empty(play->not_alive_head);
-
-    /**
-     * destruir o próprio ChessBoard
+     * destruir o próprio ChessMatch
      */
     free(play);
 }
@@ -437,17 +372,17 @@ void chess_destroy_move(ChessMove *mov){
     free(mov);
 }
 
-int chess_empty_square(ChessBoard* play, char col, char row){
+int chess_empty_square(ChessMatch* play, char col, char row){
     return (chess_piece_in_pos(play, col, row) == NULL);
 }
 
-int chess_safe_square(ChessBoard* play, char col, char row){
+int chess_safe_square(ChessMatch* play, char col, char row){
     return 1;
 }
 
-int chess_squares_satifies(ChessBoard *play, char fromCol, char fromRow,
+int chess_squares_satifies(ChessMatch *play, char fromCol, char fromRow,
                             char toCol, char toRow, 
-                            int (*func)(ChessBoard*, char, char)){
+                            int (*func)(ChessMatch*, char, char)){
     if (fromCol == toCol && fromRow == toRow)
         return 1;
     if (!func(play, fromCol, fromRow))
