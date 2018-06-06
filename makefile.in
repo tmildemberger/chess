@@ -6,6 +6,8 @@
 #ALLEG_INC
 #ALLEG_LIB
 
+DEBUG_OPT = -g
+OPTIMIZATE_OPT = -O2
 src = $(wildcard *.c)
 obj = $(src:.c=$(obj_ext))
 dep = $(obj:$(obj_ext)=.dep)
@@ -13,7 +15,13 @@ CC = gcc
 CXX = g++
 CPP = cpp
 proj = chess
-CFLAGS = $(options) -Wall $(ALLEG_INC)
+ifeq ($(options),DEBUG)
+	CFLAGS += $(DEBUG_OPT)
+endif
+ifeq ($(options),OPTIMIZATE)
+	CFLAGS += $(OPTIMIZATE_OPT)
+endif
+CFLAGS += -Wall $(ALLEG_INC)
 LDFLAGS = $(ALLEG_LIB)
 EXEC = $(proj)$(exe_ext)
 TEMPS = $(dep)

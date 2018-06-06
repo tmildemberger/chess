@@ -56,9 +56,9 @@ print('generating makefile...')
 mk = open("makefile", "w")
 options = ""
 if debug:
-    options += "-g"
+    options += "DEBUG"
 if optimizate:
-    options += "-O2"
+    options += "OPTIMIZATE"
 if options != "":
     mk.write("options = " + options + "\n")
 
