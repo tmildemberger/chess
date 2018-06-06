@@ -6,6 +6,7 @@ import locale
 debug = True
 optimizate = False
 test = False
+codeblocks = True
 
 args = sys.argv[1:]
 # if len(args) == 0:
@@ -31,6 +32,8 @@ for arg in args:
     elif arg == "--release-ok":
         debug = False
         optimizate = True
+    elif arg == "--no-codeblocks":
+        codeblocks = False
     elif arg in ["--help", "-h"]:
         print(
 """\
@@ -110,6 +113,8 @@ if os == "windows":
         import subprocess
         subprocess.call(["del", "/S", "/F", "/Q", "codeblocks", ">nul", "2>&1"], shell=True)
         subprocess.call(["rmdir", "/S", "/Q", "codeblocks", ">nul", "2>&1"], shell=True)
+        if not codeblocks:
+            exit()
         subprocess.call(["mkdir", "codeblocks", "2>nul"], shell=True)
         subprocess.call(["mkdir", "codeblocks\\art", "2>nul"], shell=True)
         import glob
