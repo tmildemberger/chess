@@ -104,18 +104,16 @@ ChessMove* chess_create_move(ChessMatch *play, ChessPiece *piece,
     }
     if (piece == NULL 
         || chess_piece_cant_move(play, piece) 
-        || (toCol == piece->column && toRow == piece->row)
+        || (toCol == piece->pos.col && toRow == piece->pos.row)
         || toCol < 0 || toCol > 7
         || toRow < 0 || toRow > 7
-        || piece->team != play->turn){
-        move->moveType = INVALID_MOVE;
+        || piece->team != play->board.turn){
+        move->type = INVALID_MOVE;
         return move;
     }
-    move->fromCol = piece->column;
-    move->fromRow = piece->row;
-    move->toCol = toCol;
-    move->toRow = toRow;
-    move->moveType = chess_analize_move(play, piece, toCol, toRow);
+    move->from = piece->pos;
+    move->to = (ChessSquare) { toCol, toRow };
+    move->type = chess_analize_move(play, piece, toCol, toRow);
     return move;
 }
 
@@ -127,20 +125,20 @@ int chess_piece_cant_move(ChessMatch *play, ChessPiece *piece){
     return 0;
 }
 
-int chess_analize_move(ChessMatch *play, ChessPiece *piece,
+MoveType chess_analize_move(ChessMatch *play, ChessPiece *piece,
                                     char toCol, char toRow){
-    int dx = toCol - piece->column;
-    int dy = toRow - piece->row;
+    int dx = toCol - piece->pos.col;
+    int dy = toRow - piece->pos.row;
     int type = UNKNOWN_MOVE;
     ChessPiece *target = chess_piece_in_pos(play, toCol, toRow);
-    ChessPiece *temp_en_passant = chess_piece_in_pos(play, toCol, toRow-1);
-    chess_list_remove_node(chess_list_find_piece(play->alive_head, piece));
-    switch (piece->name){
+    ChessPiece *temp_en_passant = chess_piece_in_pos(play, toCol, toRow-piece->heading);
+    piece->alive = 0;
+    switch (piece->type){
         case PAWN:
             if (dx == 0 && dy >= -2 && dy <= 2 ){
                 if (dy == 2 || dy == -2){
                     if (piece->movs == 0){
-                        if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                        if (chess_squares_satifies(play, piece->pos, (ChessSquare){toCol, toRow}, chess_empty_square))
                             type = NORMAL_MOVE;
                         else 
                             type = INVALID_MOVE;
@@ -154,7 +152,7 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
                         type = INVALID_MOVE;
                     }
                 }
-            } else if (dy == 1 && piece->name == WHITE && (dx == -1 || dx == +1)){
+            } else if (dy == 1 && piece->team == WHITE && (dx == -1 || dx == +1)){
                 if (target == NULL){
                     // if (temp_en_passant != NULL
                     //     && temp_en_passant->name == PAWN
@@ -171,7 +169,7 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
                         type = CAPTURE_MOVE;
                     }
                 }
-            } else if (dy == -1 && piece->name == BLACK && (dx == -1 || dx == +1)){
+            } else if (dy == -1 && piece->team == BLACK && (dx == -1 || dx == +1)){
                 if (target == NULL){
                     // if (temp_en_passant != NULL
                     //     && temp_en_passant->name == PAWN
@@ -199,7 +197,7 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
                      * se já é igual, mudar só o outro
                      * o mesmmo para o y
                      */
-                    if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                    if (chess_squares_satifies(play, piece->pos, (ChessSquare){toCol, toRow}, chess_empty_square))
                         type = NORMAL_MOVE;
                     else 
                         type = INVALID_MOVE;
@@ -207,7 +205,7 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
                     } else {
-                        if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                        if (chess_squares_satifies(play, piece->pos, (ChessSquare){toCol, toRow}, chess_empty_square))
                             type = CAPTURE_MOVE;
                         else 
                             type = INVALID_MOVE;
@@ -231,7 +229,7 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
         case BISHOP:
             if (dx == dy){
                 if (target == NULL){
-                    if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                    if (chess_squares_satifies(play, piece->pos, (ChessSquare){toCol, toRow}, chess_empty_square))
                         type = NORMAL_MOVE;
                     else 
                         type = INVALID_MOVE;
@@ -239,7 +237,7 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
                     } else {
-                        if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                        if (chess_squares_satifies(play, piece->pos, (ChessSquare){toCol, toRow}, chess_empty_square))
                             type = CAPTURE_MOVE;
                         else 
                             type = INVALID_MOVE;
@@ -250,7 +248,7 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
         case QUEEN:
             if (dx == 0 || dy == 0 || dx == dy){
                 if (target == NULL){
-                    if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                    if (chess_squares_satifies(play, piece->pos, (ChessSquare){toCol, toRow}, chess_empty_square))
                         type = NORMAL_MOVE;
                     else 
                         type = INVALID_MOVE;
@@ -258,7 +256,7 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
                     } else {
-                        if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square))
+                        if (chess_squares_satifies(play, piece->pos, (ChessSquare){toCol, toRow}, chess_empty_square))
                             type = CAPTURE_MOVE;
                         else 
                             type = INVALID_MOVE;
@@ -270,19 +268,19 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
             if (dy == 0 && (dx == 2 || dx == -2)){
                 if (target == NULL){
                     ChessPiece *rook = chess_piece_in_pos(play, 
-                                        dx == 2 ? play->board_width-1 : 0, piece->row);
+                                        dx == 2 ? play->board.board_width-1 : 0, piece->pos.row);
                     if (rook != NULL){
                         if (rook->movs == 0 && piece->movs == 0){
-                            if (chess_squares_satifies(play, piece->column, piece->row, toCol, toRow, chess_empty_square)){
-                                chess_list_remove_node(chess_list_find_piece(play->alive_head, rook));
-                                if (chess_squares_satifies(play, rook->column, rook->row, dx == 2 ? toCol-1 : toCol+1, toRow, chess_empty_square)){
-                                    if (chess_safe_square(play, toCol, toRow)
-                                        && chess_squares_satifies(play, piece->column, piece->row,
-                                                            toCol, toRow, chess_safe_square)){
+                            if (chess_squares_satifies(play, piece->pos, (ChessSquare){toCol, toRow}, chess_empty_square)){
+                                rook->alive = 0;
+                                if (chess_squares_satifies(play, rook->pos, dx == 2 ? ((ChessSquare){toCol-1, toRow}) : ((ChessSquare){toCol+1, toRow}), chess_empty_square)){
+                                    if (chess_safe_square(play, (ChessSquare){toCol, toRow})
+                                        && chess_squares_satifies(play, piece->pos,
+                                                                (ChessSquare){toCol, toRow}, chess_safe_square)){
                                         type = CASTLING_MOVE;
                                     }
                                 }
-                                chess_list_append_new_piece(play->alive_head, rook);
+                                rook->alive = 1;
                             }
                         }
                     }
@@ -300,7 +298,7 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
             }
             break;
     }
-    chess_list_append_new_piece(play->alive_head, piece);
+    piece->alive = 1;
     return type;
 }
 
@@ -309,31 +307,27 @@ int chess_analize_move(ChessMatch *play, ChessPiece *piece,
  * presume ser válida
  */
 void chess_apply_move(ChessMatch *play, ChessMove *move){
-    ChessPiece *piece = chess_piece_in_pos(play, move->fromCol, move->fromRow);
-    ChessPiece *target = chess_piece_in_pos(play, move->toCol, move->toRow);
+    ChessPiece *piece = chess_piece_in_pos(play, move->from.col, move->from.row);
+    ChessPiece *target = chess_piece_in_pos(play, move->to.col, move->to.row);
     /**
      * para cada tipo de movimento algo diferente será feito.
      * serão chamadas funções ou vai ser tudo aqui?
      */
-    if (move->moveType >= NORMAL_MOVE && move->moveType <= PROMOTION_PIECE){
-        play->movements++;
-        play->turn++;
-        play->turn %= 2;
+    if (move->type >= NORMAL_MOVE && move->type <= PROMOTION_MOVE){
+        play->board.movements++;
+        play->board.turn++;
+        play->board.turn %= 2;
     }
-    switch (move->moveType){
+    switch (move->type){
         case NORMAL_MOVE:
             piece->movs++;
-            piece->column = move->toCol;
-            piece->row = move->toRow;
+            piece->pos = move->to;
             break;
         case CAPTURE_MOVE:{
             // ChessNode *node = chess_list_find_piece(play->alive_head, target);
             piece->movs++;
-            piece->column = move->toCol;
-            piece->row = move->toRow;
-            chess_list_remove_node(chess_list_find_piece(play->alive_head, target));
-            chess_list_append_new_piece(play->not_alive_head, target);
-
+            piece->pos = move->to;
+            target->alive = 0;
             break;
         }
         case CASTLING_MOVE:
@@ -341,8 +335,6 @@ void chess_apply_move(ChessMatch *play, ChessMove *move){
         case EN_PASSANT_MOVE:
             break;
         case PROMOTION_MOVE:
-            break;
-        case PROMOTION_PIECE:
             break;
         default:
             break;
@@ -372,31 +364,32 @@ void chess_destroy_move(ChessMove *mov){
     free(mov);
 }
 
-int chess_empty_square(ChessMatch* play, char col, char row){
-    return (chess_piece_in_pos(play, col, row) == NULL);
+int chess_empty_square(ChessMatch* play, ChessSquare square){
+    return (chess_piece_in_pos(play, square.col, square.row) == NULL);
 }
 
-int chess_safe_square(ChessMatch* play, char col, char row){
+int chess_safe_square(ChessMatch* play, ChessSquare square){
     return 1;
 }
 
-int chess_squares_satifies(ChessMatch *play, char fromCol, char fromRow,
-                            char toCol, char toRow, 
-                            int (*func)(ChessMatch*, char, char)){
-    if (fromCol == toCol && fromRow == toRow)
+int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
+                            ChessSquare toSquare, 
+                            int (*func)(ChessMatch*, ChessSquare)){
+    if (fromSquare.col == toSquare.col && fromSquare.row == toSquare.row)
         return 1;
-    if (!func(play, fromCol, fromRow))
+    if (!func(play, fromSquare))
         return 0;
     int incX = 0;
     int incY = 0;
-    if (toCol - fromCol < 0)
+    if (toSquare.col - fromSquare.col < 0)
         incX = -1;
-    else if (toCol - fromCol > 0)
+    else if (toSquare.col - fromSquare.col > 0)
         incX = 1;
-    if (toRow - fromRow < 0)
+    if (toSquare.row - fromSquare.row < 0)
         incY = -1;
-    else if (toRow - fromRow > 0)
+    else if (toSquare.row - fromSquare.row > 0)
         incY = 1;
-    return chess_squares_satifies(play, fromCol+incX, fromRow+incY,
-                                    toCol, toRow, func);
+    return chess_squares_satifies(play, (ChessSquare){fromSquare.col+incX,
+                                                      fromSquare.row+incY},
+                                    toSquare, func);
 }

@@ -55,4 +55,15 @@ void chess_destroy_piece_list(ChessPieceList *pieces){
      * destruir a seção anterior
      * até que não haja próxima seção
      */
+    ChessPieceList *curr_section = pieces;
+    ChessPieceList *next = NULL;
+    int i;
+    do {
+        for (i = 0; i < curr_section->used_size; i++){
+            free(curr_section->pieces[i]);
+        }
+        next = curr_section->nxt;
+        free(curr_section);
+        curr_section = next;
+    } while (curr_section != NULL);
 }

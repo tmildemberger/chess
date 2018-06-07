@@ -8,3 +8,13 @@ ChessMoveList* chess_create_move_list(void){
 
     return list;
 }
+
+void chess_destroy_move_list(ChessMoveList* moves){
+    ChessMoveList *curr_section = moves;
+    ChessMoveList *next = NULL;
+    do {
+        next = curr_section->nxt;
+        free(curr_section);
+        curr_section = next;
+    } while (curr_section != NULL);
+}

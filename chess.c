@@ -3,7 +3,9 @@
 #include "chess_base.h"
 #include "chess_error.h"
 #include "chess_render.h"
-#include "chess_list.h"
+#include "chess_move_list.h"
+#include "chess_piece_list.h"
+#include "chess_vpiece_list.h"
 
 const float     width   =   640;
 const float     height  =   640;
@@ -25,7 +27,7 @@ const int PIECE_BLACK_B = 2;
 
 int main(int argc, char *argv[]){
     // printf("%d\n", sizeof(Piece));
-    ChessBoard *match = chess_new_game();
+    ChessMatch *match = chess_new_game();
 
     int i;
     int j;
@@ -57,10 +59,10 @@ int main(int argc, char *argv[]){
 
     int black = 0;
 
-    for (i = match->board_height-1; i >= 0 ; i--){
-        for (j = 0; j < match->board_width; j++){
+    for (i = match->board.board_height-1; i >= 0 ; i--){
+        for (j = 0; j < match->board.board_width; j++){
             if ( (pice = chess_piece_in_pos(match, j, i)) != NULL ){
-                switch (pice->name){
+                switch (pice->type){
                     case PAWN:
                         fputc( (pice->team) == WHITE ? 'P' : 'p', stdout);
                         break;
@@ -221,26 +223,23 @@ int main(int argc, char *argv[]){
     al_register_event_source(events_qu, al_get_mouse_event_source());
     al_register_event_source(events_qu, al_get_keyboard_event_source());
 
-    ChessNode               *visual_alive_head = NULL;
-    ChessNode               *visual_not_alive_head = NULL;
+    ChessVPieceList         *visual_head = NULL;
 
-    ChessNode *curr = match->alive_head->nxt;
+    ChessPieceList *curr = match->board.pieces;
 
     ChessVisualPiece *vpiece = NULL;
-    visual_alive_head = chess_list_create();
+    visual_head = chess_create_new_vpiece_list();
 
-    while (curr != match->alive_head->prv){
-        vpiece = calloc(1, sizeof (ChessVisualPiece));
-        vpiece->piece = curr->piece;
-        vpiece->x = vpiece->piece->column*80+(disp_data.width-640)/2;
-        vpiece->y = (match->board_height-1-vpiece->piece->row)*80+(disp_data.height-640)/2;
-
-        // printf("%d %d\n", vpiece->x, vpiece->y);
-        chess_list_append_new_v_piece(visual_alive_head, vpiece);
+    do {
+        for (i = 0; i < curr->used_size; i++){
+            vpiece = calloc(1, sizeof (ChessVisualPiece));
+            vpiece->piece = curr->pieces[i];
+            vpiece->x = vpiece->piece->pos.col*80+(disp_data.width-640)/2;
+            vpiece->y = (match->board.board_height-1-vpiece->piece->pos.row)*80+(disp_data.height-640)/2;
+            chess_append_vpiece(visual_head, vpiece);
+        }
         curr = curr->nxt;
-    }
-
-    visual_not_alive_head = chess_list_create();
+    } while (curr != NULL);
  
     ALLEGRO_COLOR light_square_color = al_map_rgb(6, 27, 56);//(43, 74, 111);//(13, 77, 77);
     al_set_target_bitmap(table);
@@ -339,43 +338,34 @@ int main(int argc, char *argv[]){
 
                 if ((r == PIECE_BLACK_R && g == PIECE_BLACK_G && b == PIECE_BLACK_B)
                 || (r == PIECE_WHITE_R && g == PIECE_WHITE_G && b == PIECE_WHITE_B)){
-                    dragging = chess_list_find_v_piece_with_piece(visual_alive_head,
+                    dragging = chess_find_vpiece_with_piece(visual_head,
                         chess_piece_in_pos(match,
                         (event.mouse.x - (disp_data.width-640)/2 ) / 80,
-                        match->board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)));
+                        match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)));
                     printf("im dragging this piece: %hhd %hhd %hhd %hhd\n", 
-                        dragging->piece->column, dragging->piece->row,
-                        dragging->piece->name, dragging->piece->team);
+                        dragging->piece->pos.col, dragging->piece->pos.row,
+                        dragging->piece->type, dragging->piece->team);
                     x_diff = dragging->x - event.mouse.x;
                     y_diff = dragging->y - event.mouse.y;
                 }
              }
 
         } else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP){
-            ChessPiece *last = match->not_alive_head->prv->prv->piece;
 
             ChessMove *move = chess_create_move(match, dragging->piece, 
                     (event.mouse.x - (disp_data.width-640)/2 ) / 80,
-                    match->board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80));
+                    match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80));
             chess_apply_move(match, move);
             // printf("i tried to move from %d %d to %d %d -- %d\n", move->fromCol,
             //     move->fromRow, move->toCol, move->toRow, move->moveType);
-            printf("i tried to move from %d %d to %d %d -- %d\n", dragging->piece->column,
-                dragging->piece->row, (event.mouse.x - (disp_data.width-640)/2 ) / 80, match->board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80), move->moveType);
+            printf("i tried to move from %d %d to %d %d -- %d\n", dragging->piece->pos.col,
+                dragging->piece->pos.row, (event.mouse.x - (disp_data.width-640)/2 ) / 80, match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80), move->type);
             chess_destroy_move(move);
 
-            dragging->x = dragging->piece->column*80+(disp_data.width-640)/2;
-            dragging->y = (match->board_height-1-dragging->piece->row)*80+(disp_data.height-640)/2;
+            dragging->x = dragging->piece->pos.col*80+(disp_data.width-640)/2;
+            dragging->y = (match->board.board_height-1-dragging->piece->pos.row)*80+(disp_data.height-640)/2;
 
             dragging = NULL;
-
-            if (match->not_alive_head->prv->prv->piece != last){
-                ChessVisualPiece *captured = chess_list_find_v_piece_with_piece(visual_alive_head, 
-                    match->not_alive_head->prv->prv->piece);
-
-                chess_list_remove_node(chess_list_find_v_piece(visual_alive_head, captured));
-                chess_list_append_new_v_piece(visual_not_alive_head, captured);
-            }
 
         }
 
@@ -387,11 +377,16 @@ int main(int argc, char *argv[]){
             al_draw_bitmap(table, -1, -1, -1);
 
             if (draw_pieces){
-                ChessNode *curr_node = visual_alive_head->nxt;
-                while (curr_node != visual_alive_head->prv){
-                    al_draw_bitmap(images[curr_node->vpiece->piece->name + 6*curr_node->vpiece->piece->team],
-                                    curr_node->vpiece->x - (disp_data.width-640)/2, curr_node->vpiece->y - (disp_data.height-640)/2, 0);
-                    curr_node = curr_node->nxt;
+                ChessVPieceList *curr = visual_head;
+                while (curr != NULL){
+                    for (i = 0; i < curr->used_size; i++){
+                        ChessPiece *pc = curr->vpieces[i]->piece;
+                        if (pc->alive){
+                            al_draw_bitmap(images[pc->type + 6*pc->team],
+                                            curr->vpieces[i]->x - (disp_data.width-640)/2, curr->vpieces[i]->y - (disp_data.height-640)/2, 0);
+                        }
+                    }
+                    curr = curr->nxt;
                 }
             }
 
@@ -431,33 +426,8 @@ int main(int argc, char *argv[]){
     al_destroy_bitmap(real_board);
     al_destroy_event_queue(events_qu);
 
-    ChessNode *current = visual_alive_head->nxt;
-    ChessNode *next = NULL;
-    while (current != visual_alive_head->prv){
-        next = current->nxt;
-
-        current->nxt = NULL;
-
-        free(current->vpiece);
-        free(current);
-
-        current = next;
-    }
-    chess_list_destroy_empty(visual_alive_head);
-
-    current = visual_not_alive_head->nxt;
-    next = NULL;
-    while (current != visual_not_alive_head->prv){
-        next = current->nxt;
-
-        current->nxt = NULL;
-
-        free(current->vpiece);
-        free(current);
-
-        current = next;
-    }
-    chess_list_destroy_empty(visual_not_alive_head);
+    chess_destroy_vpiece_list(visual_head);
+    
 
 
     chess_game_over(match);

@@ -128,12 +128,12 @@ ChessMove* chess_create_move(ChessMatch *play, ChessPiece *piece,
 // ChessMove* chess_is_valid_move(ChessMatch *play, ChessPiece *piece,
 //                                                  char toCol, char toRow);
 int chess_piece_cant_move(ChessMatch *play, ChessPiece *piece);
-int chess_analize_move(ChessMatch *play, ChessPiece *piece,
+MoveType chess_analize_move(ChessMatch *play, ChessPiece *piece,
                                     char toCol, char toRow);
 void chess_apply_move(ChessMatch *play, ChessMove *move);
 int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
                             ChessSquare toSquare, 
-                            int (*func)(ChessMatch*, char, char));
+                            int (*func)(ChessMatch*, ChessSquare));
 int chess_empty_square(ChessMatch* play, ChessSquare square);
 int chess_safe_square(ChessMatch* play, ChessSquare square);
 
