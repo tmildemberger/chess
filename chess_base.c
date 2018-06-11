@@ -383,6 +383,34 @@ int chess_friendly_fire(ChessMatch *play,
     return target != NULL && attacker->team == target->team;
 }
 
+int chess_pawn_ok_capture(int dx, int dy){
+
+}
+
+int chess_pawn_ok_normal(int dx, int dy){
+    
+}
+
+int chess_rook_ok_move(int dx, int dy){
+
+}
+
+int chess_knight_ok_move(int dx, int dy){
+
+}
+
+int chess_bishop_ok_move(int dx, int dy){
+
+}
+
+int chess_queen_ok_move(int dx, int dy){
+
+}
+
+int chess_king_ok_move(int dx, int dy){
+    
+}
+
 int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
                             ChessSquare toSquare, 
                             int (*func)(ChessMatch*, ChessSquare)){
