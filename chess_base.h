@@ -148,15 +148,15 @@ MoveType (*chess_special_moves[])(ChessMatch*, ChessPiece*, ChessMove) = {
     chess_castling_move
 };
 
-int chess_pawn_ok_capture(int dx, int dy);
-int chess_pawn_ok_normal(int dx, int dy);
-int chess_rook_ok_move(int dx, int dy);
-int chess_knight_ok_move(int dx, int dy);
-int chess_bishop_ok_move(int dx, int dy);
-int chess_queen_ok_move(int dx, int dy);
-int chess_king_ok_move(int dx, int dy);
+int chess_pawn_ok_capture(ChessPiece *piece, int dx, int dy);
+int chess_pawn_ok_normal(ChessPiece *piece, int dx, int dy);
+int chess_rook_ok_move(ChessPiece *piece, int dx, int dy);
+int chess_knight_ok_move(ChessPiece *piece, int dx, int dy);
+int chess_bishop_ok_move(ChessPiece *piece, int dx, int dy);
+int chess_queen_ok_move(ChessPiece *piece, int dx, int dy);
+int chess_king_ok_move(ChessPiece *piece, int dx, int dy);
 
-int (*chess_normal_moves[])(int, int) = {
+int (*chess_normal_moves[])(ChessPiece, int, int) = {
     chess_pawn_ok_normal,
     chess_rook_ok_move,
     chess_knight_ok_move,
@@ -165,7 +165,7 @@ int (*chess_normal_moves[])(int, int) = {
     chess_king_ok_move
 };
 
-int (*chess_capture_moves[])(int, int) = {
+int (*chess_capture_moves[])(ChessPiece, int, int) = {
     chess_pawn_ok_capture,
     chess_rook_ok_move,
     chess_knight_ok_move,
