@@ -34,7 +34,7 @@ void chess_append_piece(ChessPieceList *list, ChessPiece *piece){
 
 ChessPiece* chess_find_piece_in_square(ChessPieceList *list, ChessSquare square){
     ChessPieceList *curr_section = list;
-    int i;
+    unsigned i;
     do {
         for (i = 0; i < curr_section->used_size; i++){
             if (curr_section->pieces[i]->alive &&
@@ -57,7 +57,7 @@ void chess_destroy_piece_list(ChessPieceList *pieces){
      */
     ChessPieceList *curr_section = pieces;
     ChessPieceList *next = NULL;
-    int i;
+    unsigned i;
     do {
         for (i = 0; i < curr_section->used_size; i++){
             free(curr_section->pieces[i]);

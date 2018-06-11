@@ -34,7 +34,7 @@ void chess_append_vpiece(ChessVPieceList *list, ChessVisualPiece *vpiece){
 
 ChessVisualPiece* chess_find_vpiece_with_piece(ChessVPieceList *list, ChessPiece *piece){
     ChessVPieceList *curr_section = list;
-    int i;
+    unsigned i;
     do {
         for (i = 0; i < curr_section->used_size; i++){
             if (curr_section->vpieces[i]->piece == piece){
@@ -55,7 +55,7 @@ void chess_destroy_vpiece_list(ChessVPieceList *vpieces){
      */
     ChessVPieceList *curr_section = vpieces;
     ChessVPieceList *next = NULL;
-    int i;
+    unsigned i;
     do {
         for (i = 0; i < curr_section->used_size; i++){
             free(curr_section->vpieces[i]);

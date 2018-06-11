@@ -21,7 +21,9 @@ endif
 ifeq ($(options),OPTIMIZATE)
 	CFLAGS += $(OPTIMIZATE_OPT)
 endif
-CFLAGS += -Wall $(ALLEG_INC)
+CFLAGS += -Wall -Wextra -std=c99 -pedantic 
+CFLAGS += -Werror -Wno-unused-parameter -Wno-unused-variable
+CFLAGS += $(ALLEG_INC)
 LDFLAGS = $(ALLEG_LIB)
 EXEC = $(proj)$(exe_ext)
 TEMPS = $(dep)

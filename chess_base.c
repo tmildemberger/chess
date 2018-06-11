@@ -79,18 +79,18 @@ ChessPiece* chess_new_piece(char col, char row, PiecesType name, char team){
  * retorna a peça na posição enviada, e NULL
  * se não houver peça nessa casa
  */
-ChessPiece* chess_piece_in_pos(ChessMatch *play, char col, char row){
+ChessPiece* chess_piece_in_pos(ChessMatch *play, ChessSquare square){
     return chess_find_piece_in_square(play->board.pieces, 
-                                      (ChessSquare){ col, row });
+                                      square);
 }
 
 /**
- * recebe uma jogada e retorna VALID_MOVE se válida
- * ou INVALID_MOVE se inválida, levando em conta a 
- * situação do tabuleiro que também recebe
+ * cria uma jogada com tudo dentro
  */
-ChessMove* chess_create_move(ChessMatch *play, ChessPiece *piece,
-                                            char toCol, char toRow){
+ChessMove chess_create_move(ChessMatch *play, 
+                            ChessPiece *piece,
+                            ChessSquare toSquare,
+                            PiecesType targetType){
     /**
      * @todo: função pra ver se a peça pode se mover
      * (por enquanto só retorna sim), função pra ver se 
@@ -98,22 +98,21 @@ ChessMove* chess_create_move(ChessMatch *play, ChessPiece *piece,
      * ver se ele chegou à última casa), funções pra ver se
      * o movimento pode ser especial
      */
-    ChessMove *move = calloc(1, sizeof(ChessMove));
-    if (move == NULL){
-        chess_error(ALLOC_ERROR);
-    }
-    if (piece == NULL 
-        || chess_piece_cant_move(play, piece) 
-        || (toCol == piece->pos.col && toRow == piece->pos.row)
-        || toCol < 0 || toCol > 7
-        || toRow < 0 || toRow > 7
-        || piece->team != play->board.turn){
-        move->type = INVALID_MOVE;
+    ChessPiece *target = chess_piece_in_pos(play, toSquare);
+    ChessMove move;
+    if (piece == NULL ||
+        chess_piece_cant_move(play, piece) ||
+        chess_square_outside_board(play, toSquare) ||
+        chess_same_square(piece->pos, toSquare) ||
+        chess_not_in_your_turn(play, piece) ||
+        chess_friendly_fire(play, piece, target) ){
+        move.type = INVALID_MOVE;
         return move;
     }
-    move->from = piece->pos;
-    move->to = (ChessSquare) { toCol, toRow };
-    move->type = chess_analize_move(play, piece, toCol, toRow);
+    move.from = piece->pos;
+    move.to = toSquare;
+    move.targetType = targetType;
+    move.type = chess_analize_move(play, piece, move);
     return move;
 }
 
@@ -125,8 +124,16 @@ int chess_piece_cant_move(ChessMatch *play, ChessPiece *piece){
     return 0;
 }
 
-MoveType chess_analize_move(ChessMatch *play, ChessPiece *piece,
-                                    char toCol, char toRow){
+MoveType chess_analize_move(ChessMatch *play, 
+                            ChessPiece *piece,
+                            ChessMove move){
+    /**
+     * checar se é possível um movimento especial
+     * depois ver que o que faz para movimentos normais 
+     * e de captura...
+     */
+    MoveType type;
+    type = 
     int dx = toCol - piece->pos.col;
     int dy = toRow - piece->pos.row;
     int type = UNKNOWN_MOVE;
@@ -154,14 +161,7 @@ MoveType chess_analize_move(ChessMatch *play, ChessPiece *piece,
                 }
             } else if (dy == 1 && piece->team == WHITE && (dx == -1 || dx == +1)){
                 if (target == NULL){
-                    // if (temp_en_passant != NULL
-                    //     && temp_en_passant->name == PAWN
-                    //     && temp_en_passant->movs == 1
-                    //     && temp_en_passant->row == play->board_height-4){
-                    //     type = EN_PASSANT_MOVE;
-                    // } else {
                         type = INVALID_MOVE;
-                    // }
                 } else {
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
@@ -171,14 +171,7 @@ MoveType chess_analize_move(ChessMatch *play, ChessPiece *piece,
                 }
             } else if (dy == -1 && piece->team == BLACK && (dx == -1 || dx == +1)){
                 if (target == NULL){
-                    // if (temp_en_passant != NULL
-                    //     && temp_en_passant->name == PAWN
-                    //     && temp_en_passant->movs == 1
-                    //     && temp_en_passant->row == 3){
-                    //     type = EN_PASSANT_MOVE;
-                    // } else {
                         type = INVALID_MOVE;
-                    // }
                 } else {
                     if (target->team == piece->team){
                         type = INVALID_MOVE;
@@ -195,7 +188,7 @@ MoveType chess_analize_move(ChessMatch *play, ChessPiece *piece,
                      * talvez a função saiba andar sozinha
                      * se o x ainda é diferente, continuar mudando,
                      * se já é igual, mudar só o outro
-                     * o mesmmo para o y
+                     * o mesmo para o y
                      */
                     if (chess_squares_satifies(play, piece->pos, (ChessSquare){toCol, toRow}, chess_empty_square))
                         type = NORMAL_MOVE;
@@ -307,8 +300,8 @@ MoveType chess_analize_move(ChessMatch *play, ChessPiece *piece,
  * presume ser válida
  */
 void chess_apply_move(ChessMatch *play, ChessMove *move){
-    ChessPiece *piece = chess_piece_in_pos(play, move->from.col, move->from.row);
-    ChessPiece *target = chess_piece_in_pos(play, move->to.col, move->to.row);
+    ChessPiece *piece = chess_piece_in_pos(play, move->from);
+    ChessPiece *target = chess_piece_in_pos(play, move->to);
     /**
      * para cada tipo de movimento algo diferente será feito.
      * serão chamadas funções ou vai ser tudo aqui?
@@ -324,7 +317,6 @@ void chess_apply_move(ChessMatch *play, ChessMove *move){
             piece->pos = move->to;
             break;
         case CAPTURE_MOVE:{
-            // ChessNode *node = chess_list_find_piece(play->alive_head, target);
             piece->movs++;
             piece->pos = move->to;
             target->alive = 0;
@@ -365,11 +357,30 @@ void chess_destroy_move(ChessMove *mov){
 }
 
 int chess_empty_square(ChessMatch* play, ChessSquare square){
-    return (chess_piece_in_pos(play, square.col, square.row) == NULL);
+    return (chess_piece_in_pos(play, square) == NULL);
 }
 
 int chess_safe_square(ChessMatch* play, ChessSquare square){
     return 1;
+}
+
+int chess_same_square(ChessSquare sq1, ChessSquare sq2){
+    return sq1.col == sq2.col && sq1.row == sq2.row;
+}
+
+int chess_square_outside_board(ChessMatch *play, ChessSquare square){
+    return square.col >= play->board.board_width ||
+           square.row >= play->board.board_height;
+}
+
+int chess_not_in_your_turn(ChessMatch *play, ChessPiece *piece){
+    return piece->team != play->board.turn;
+}
+
+int chess_friendly_fire(ChessMatch *play, 
+                        ChessPiece *attacker, 
+                        ChessPiece *target){
+    return target != NULL && attacker->team == target->team;
 }
 
 int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
