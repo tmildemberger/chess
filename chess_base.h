@@ -18,7 +18,6 @@ typedef enum pieces_type {
 
 typedef enum move_type {
     INVALID_MOVE = 0,
-    UNKNOWN_MOVE,
     NORMAL_MOVE,
     CAPTURE_MOVE,
     CASTLING_MOVE,
@@ -107,7 +106,7 @@ typedef struct match{
 ChessMatch* chess_new_game(void);
 ChessPiece* chess_new_piece(char col, char row, PiecesType name, char team);
 
-ChessPiece* chess_piece_in_pos(ChessMatch *play, char col, char row);
+ChessPiece* chess_piece_in_pos(ChessMatch *play, ChessSquare square);
 ChessMove chess_create_move(ChessMatch *play, 
                             ChessPiece *piece,
                             ChessSquare toSquare,
@@ -116,7 +115,7 @@ int chess_piece_cant_move(ChessMatch *play, ChessPiece *piece);
 MoveType chess_analize_move(ChessMatch *play, 
                             ChessPiece *piece,
                             ChessMove move);
-void chess_apply_move(ChessMatch *play, ChessMove *move);
+void chess_apply_move(ChessMatch *play, ChessMove move);
 int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
                             ChessSquare toSquare, 
                             int (*func)(ChessMatch*, ChessSquare));
@@ -139,14 +138,15 @@ MoveType chess_castling_move(ChessMatch*, ChessPiece*, ChessMove);
 MoveType chess_promotion_move(ChessMatch*, ChessPiece*, ChessMove);
 MoveType chess_pawn_specials(ChessMatch*, ChessPiece*, ChessMove);
 
-MoveType (*chess_special_moves[])(ChessMatch*, ChessPiece*, ChessMove) = {
-    chess_pawn_specials,
-    chess_no_special,
-    chess_no_special,
-    chess_no_special,
-    chess_no_special,
-    chess_castling_move
-};
+extern MoveType (*chess_special_moves[])(ChessMatch*, ChessPiece*, ChessMove);
+
+MoveType chess_special_check(ChessMatch *play, 
+                             ChessPiece *piece, 
+                             ChessMove move);
+
+MoveType chess_other_check(ChessMatch *play, 
+                             ChessPiece *piece, 
+                             ChessMove move);
 
 int chess_pawn_ok_capture(ChessPiece *piece, int dx, int dy);
 int chess_pawn_ok_normal(ChessPiece *piece, int dx, int dy);
@@ -156,22 +156,19 @@ int chess_bishop_ok_move(ChessPiece *piece, int dx, int dy);
 int chess_queen_ok_move(ChessPiece *piece, int dx, int dy);
 int chess_king_ok_move(ChessPiece *piece, int dx, int dy);
 
-int (*chess_normal_moves[])(ChessPiece, int, int) = {
-    chess_pawn_ok_normal,
-    chess_rook_ok_move,
-    chess_knight_ok_move,
-    chess_bishop_ok_move,
-    chess_queen_ok_move,
-    chess_king_ok_move
-};
+extern int (*chess_normal_moves[])(ChessPiece*, int, int);
 
-int (*chess_capture_moves[])(ChessPiece, int, int) = {
-    chess_pawn_ok_capture,
-    chess_rook_ok_move,
-    chess_knight_ok_move,
-    chess_bishop_ok_move,
-    chess_queen_ok_move,
-    chess_king_ok_move
-};
+extern int (*chess_capture_moves[])(ChessPiece*, int, int);
+
+int chess_apply_invalid_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_apply_normal_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_apply_capture_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_apply_castling_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_apply_en_passant_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_apply_promotion_move(ChessMatch*, ChessPiece*, ChessMove);
+
+void chess_put_piece_in(ChessPiece *piece, ChessSquare toSquare);
+
+extern int (*chess_apply_moves[])(ChessMatch*, ChessPiece*, ChessMove);
 
 #endif

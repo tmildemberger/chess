@@ -7,6 +7,12 @@
 #include "chess_piece_list.h"
 #include "chess_vpiece_list.h"
 
+#define CLI 1
+
+#if CLI == 1
+
+
+#else
 const float     width   =   640;
 const float     height  =   640;
 
@@ -24,8 +30,154 @@ const int PIECE_WHITE_B = 100;
 const int PIECE_BLACK_R = 85;
 const int PIECE_BLACK_G = 54;
 const int PIECE_BLACK_B = 2;
+#endif
+
+void getAtoH(char *s, int *i, char *c){
+    while ((*c) < 'a' || (*c) > 'h') {
+        (*c) = s[*i];
+        (*i)++;
+    }
+}
+
+void get1to8(char *s, int *i, char *c){
+    while ((*c) < '1' || (*c) > '8') {
+        (*c) = s[*i];
+        (*i)++;
+    }
+}
+
+ChessMove mkMove(ChessMatch *match, char *str){
+    char fromCol = 0;
+    char fromRow = 0;
+    char toCol = 0;
+    char toRow = 0;
+    char targetType = 0;
+    PiecesType pType;
+    int idx = 0;
+    getAtoH(str, &idx, &fromCol);
+    get1to8(str, &idx, &fromRow);
+    getAtoH(str, &idx, &toCol);
+    get1to8(str, &idx, &toRow);
+    printf("%c%c %c%c\n", fromCol, fromRow, toCol, toRow);
+    ChessSquare from = { fromCol - 'a', fromRow - '1' };
+    ChessSquare to = { toCol - 'a', toRow - '1' };
+    ChessPiece *piece = chess_piece_in_pos(match, from);
+    ChessPiece *target = chess_piece_in_pos(match, to);
+    idx++;
+    targetType = str[idx];
+    if (targetType == '\n'){
+        if (target != NULL) pType = target->type;
+        else pType = piece->type;
+    } else {
+        switch (targetType){
+            case 'p':
+                pType = PAWN;
+                break;
+            case 'r':
+                pType = ROOK;
+                break;
+            case 'n':
+                pType = KNIGHT;
+                break;
+            case 'b':
+                pType = BISHOP;
+                break;
+            case 'q':
+                pType = QUEEN;
+                break;
+            case 'k':
+                pType = KING;
+                break;
+            default:
+                if (target != NULL) pType = target->type;
+                else pType = piece->type;
+        }
+    }
+    return chess_create_move(match, piece, to, pType);
+}
+
+int readMove(ChessMatch *match, ChessMove *mv){
+    char in[20];
+    fgets(in, 20, stdin);
+    if (strcmp(in, "exit") == 0) return -1;
+    (*mv) = mkMove(match, in);
+    if (mv->type == INVALID_MOVE) return 0;
+    else return 1;
+}
+
+void print_all(ChessMatch *match){
+    unsigned i;
+    unsigned j;
+    ChessPiece *pice;
+
+    int black = 0;
+
+    for (i = match->board.board_height-1; ; i--){
+        for (j = 0; j < match->board.board_width; j++){
+            if ( (pice = chess_piece_in_pos(match, (ChessSquare){j, i})) != NULL ){
+                switch (pice->type){
+                    case PAWN:
+                        fputc( (pice->team) == WHITE ? 'P' : 'p', stdout);
+                        break;
+                    case ROOK:
+                        fputc( (pice->team) == WHITE ? 'R' : 'r', stdout);
+                        break;
+                    case KNIGHT:
+                        fputc( (pice->team) == WHITE ? 'N' : 'n', stdout);
+                        break;
+                    case BISHOP:
+                        fputc( (pice->team) == WHITE ? 'B' : 'b', stdout);
+                        break;
+                    case QUEEN:
+                        fputc( (pice->team) == WHITE ? 'Q' : 'q', stdout);
+                        break;
+                    case KING:
+                        fputc( (pice->team) == WHITE ? 'K' : 'k', stdout);
+                        break;
+                }
+            } else {
+                if(black){
+                    fputc('+', stdout);
+                } else {
+                    fputc('_', stdout);
+                }
+            }
+            black = !black;
+        }
+        fputc('\n', stdout);
+        black = !black;
+        if (i == 0) break;
+    }
+}
 
 int main(int argc, char *argv[]){
+    
+#if CLI == 1
+    ChessMatch *match = chess_new_game();
+    ChessMove move;
+    int status;
+    char in;
+    while (1){
+        print_all(match);
+        status = readMove(match, &move);
+        if (status == 1){
+            printf("movimento valido. realizar movimento? (y/n)\n");
+            in = 0;
+            while (in != 'y' && in != 'n'){
+                in = fgetc(stdin);
+                fflush(stdin);
+            }
+            if (in == 'y') {
+                chess_apply_move(match, move);
+            }
+        } else if (status == 0) {
+            printf("esse movimento nao e legal, tente outro\n");
+        } else {
+            break;
+        }
+    }
+
+#else
     ChessMatch *match = chess_new_game();
 
     unsigned i;
@@ -94,6 +246,7 @@ int main(int argc, char *argv[]){
         black = !black;
         if (i == 0) break;
     }
+    
 
 
 
@@ -400,32 +553,7 @@ int main(int argc, char *argv[]){
         chess_handle_event(&event);
     }
     */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif
 
     return 0;
 }

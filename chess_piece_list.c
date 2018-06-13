@@ -8,7 +8,7 @@ ChessPieceList* chess_create_piece_list_section(int size){
     ChessPieceList *new_list = calloc(
             1, 
             sizeof (ChessPieceList) + 
-            sizeof (ChessPiece) * size );
+            sizeof (ChessPiece*) * size );
 
     new_list->allocated_size = size;
 

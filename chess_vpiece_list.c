@@ -8,7 +8,7 @@ ChessVPieceList* chess_create_vpiece_list_section(int size){
     ChessVPieceList *new_list = calloc(
             1, 
             sizeof (ChessVPieceList) + 
-            sizeof (ChessVisualPiece) * size );
+            sizeof (ChessVisualPiece*) * size );
 
     new_list->allocated_size = size;
 
