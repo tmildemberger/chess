@@ -388,27 +388,33 @@ int chess_pawn_ok_capture(ChessPiece *piece, int dx, int dy){
 }
 
 int chess_pawn_ok_normal(ChessPiece *piece, int dx, int dy){
-    return piece->movs == 0 && 
+    return dx == 0 && (
+           (dy = 2*piece->heading && piece->movs == 0) ||
+           (dy = piece->heading)
+           );
 }
 
 int chess_rook_ok_move(ChessPiece *piece, int dx, int dy){
-
+    return dx == 0 || dy == 0;
 }
 
 int chess_knight_ok_move(ChessPiece *piece, int dx, int dy){
-
+    dx = dx>0 ? dx : -dx;
+    dy = dy>0 ? dy : -dy;
+    return dx + dy == 3 && dx * dy == 2;
 }
 
 int chess_bishop_ok_move(ChessPiece *piece, int dx, int dy){
-
+    return dx == dy || dx == -dy;
 }
 
 int chess_queen_ok_move(ChessPiece *piece, int dx, int dy){
-
+    return chess_rook_ok_move(piece, dx, dy) ||
+           chess_bishop_ok_move(piece, dx, dy);
 }
 
 int chess_king_ok_move(ChessPiece *piece, int dx, int dy){
-    
+    return dx <= 1 && dy <= 1;
 }
 
 int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
