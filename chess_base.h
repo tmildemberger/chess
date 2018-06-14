@@ -10,6 +10,23 @@ typedef enum pieces_type {
     KING
 } PiecesType;
 
+typedef enum directions_type {
+    NO = 0,
+    UP = 1,
+    DOWN = 2,
+    RIGHT = 4,
+    LEFT = 8,
+    UP_RIGHT = 5,
+    UP_LEFT = 9,
+    DOWN_RIGHT = 6,
+    DOWN_LEFT = 10
+} DirectionType;
+
+typedef enum check_type {
+    LAST,
+    NO_LAST
+} CheckType;
+
 #define WHITE 0
 #define BLACK 1
 
@@ -170,5 +187,21 @@ int chess_apply_promotion_move(ChessMatch*, ChessPiece*, ChessMove);
 void chess_put_piece_in(ChessPiece *piece, ChessSquare toSquare);
 
 extern int (*chess_apply_moves[])(ChessMatch*, ChessPiece*, ChessMove);
+
+DirectionType chess_get_directions(ChessSquare from, ChessSquare to);
+
+void chess_inc_square(ChessSquare *square, DirectionType dir);
+
+int chess_empty_squares(ChessMatch *play, 
+                        ChessSquare fromSquare,
+                        ChessSquare toSquare,
+                        CheckType check);
+
+int chess_ignore_squares(ChessMatch *play, 
+                         ChessSquare fromSquare,
+                         ChessSquare toSquare,
+                         CheckType check);
+
+extern int (*chess_pieces_ranges[])(ChessMatch*, ChessSquare, ChessSquare, CheckType);
 
 #endif

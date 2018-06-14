@@ -38,6 +38,15 @@ int (*chess_apply_moves[])(ChessMatch*, ChessPiece*, ChessMove) = {
     chess_apply_promotion_move
 };
 
+int (*chess_pieces_ranges[])(ChessMatch*, ChessSquare, ChessSquare, CheckType) = {
+    chess_empty_squares,
+    chess_empty_squares,
+    chess_ignore_squares,
+    chess_empty_squares,
+    chess_empty_squares,
+    chess_empty_squares
+};
+
 /**
  * Primeira função a ser chamada - cria um novo jogo
  */
@@ -191,7 +200,9 @@ MoveType chess_en_passant(ChessMatch *play,
         otherPawn->type == PAWN &&
         otherPawn->movs == 1 &&
         (lastMove.to.row - lastMove.from.row == -2 ||
-        lastMove.to.row - lastMove.from.row == 2))
+        lastMove.to.row - lastMove.from.row == 2) &&
+        chess_same_square(otherPawn->pos, 
+                          (ChessSquare){ move.to.col, piece->pos.row }))
         return EN_PASSANT_MOVE;
     else 
         return INVALID_MOVE;
@@ -206,8 +217,9 @@ MoveType chess_castling_move(ChessMatch *play,
 MoveType chess_promotion_move(ChessMatch *play, 
                               ChessPiece *piece, 
                               ChessMove move){
-    unsigned short lastRow = ( play->board.board_height / 2 ) * 
-                             ( 1 + piece->heading );
+    unsigned short lastRow = piece->heading > 0 ? 
+                             play->board.board_height - 1 : 
+                             0;
     int dx = move.to.col - piece->pos.col;
     int dy = move.to.row - piece->pos.row;
     if (move.to.row == lastRow && chess_pawn_ok_normal(piece, dx, dy))
@@ -237,11 +249,13 @@ MoveType chess_other_check(ChessMatch *play,
     int dx = move.to.col - piece->pos.col;
     int dy = move.to.row - piece->pos.row;
     if (target != NULL){
-        return chess_capture_moves[piece->type](piece, dx, dy) ? 
+        return chess_pieces_ranges[piece->type](play, move.from, move.to, NO_LAST) &&
+               chess_capture_moves[piece->type](piece, dx, dy) ? 
                CAPTURE_MOVE : 
                INVALID_MOVE;
     } else {
-        return chess_normal_moves[piece->type](piece, dx, dy) ?
+        return chess_pieces_ranges[piece->type](play, move.from, move.to, LAST) &&
+               chess_normal_moves[piece->type](piece, dx, dy) ?
                NORMAL_MOVE :
                INVALID_MOVE;
     }
@@ -312,7 +326,7 @@ int chess_friendly_fire(ChessMatch *play,
 }
 
 int chess_pawn_ok_capture(ChessPiece *piece, int dx, int dy){
-    return (dx == 1 || dx == -1) && dx == piece->heading;
+    return (dx == 1 || dx == -1) && dy == piece->heading;
 }
 
 int chess_pawn_ok_normal(ChessPiece *piece, int dx, int dy){
@@ -420,4 +434,75 @@ int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
     return chess_squares_satifies(play, (ChessSquare){fromSquare.col+incX,
                                                       fromSquare.row+incY},
                                     toSquare, func);
+}
+
+DirectionType chess_get_directions(ChessSquare from, ChessSquare to){
+    DirectionType dir = NO;
+    if (to.col > from.col) dir += RIGHT;
+    else if (to.col < from.col) dir += LEFT;
+
+    if (to.row > from.row) dir += UP;
+    else if (to.row < from.row) dir += DOWN;
+    return dir;
+}
+
+void chess_inc_square(ChessSquare *square, DirectionType dir){
+    switch (dir){
+        case UP:
+            square->row++;
+            break;
+        case DOWN:
+            square->row--;
+            break;
+        case RIGHT:
+            square->col++;
+            break;
+        case LEFT:
+            square->col--;
+            break;
+        case UP_RIGHT:
+            square->row++;
+            square->col++;
+            break;
+        case UP_LEFT:
+            square->row++;
+            square->col--;
+            break;
+        case DOWN_RIGHT:
+            square->row--;
+            square->col++;
+            break;
+        case DOWN_LEFT:
+            square->row--;
+            square->col--;
+            break;
+        case NO:
+        default:
+            break;
+    }
+}
+
+int chess_empty_squares(ChessMatch *play, 
+                        ChessSquare fromSquare,
+                        ChessSquare toSquare,
+                        CheckType check){
+    DirectionType dir = chess_get_directions(fromSquare, toSquare);
+    ChessSquare square = fromSquare;
+    chess_inc_square(&square, dir);
+    while (!chess_same_square(square, toSquare)){
+        if (chess_piece_in_pos(play, square) != NULL) return 0;
+        chess_inc_square(&square, dir);
+    }
+    if (check == LAST){
+        return chess_piece_in_pos(play, square) == NULL;
+    } else {
+        return 1;
+    }
+}
+
+int chess_ignore_squares(ChessMatch *play, 
+                         ChessSquare fromSquare,
+                         ChessSquare toSquare,
+                         CheckType check){
+    return 1;
 }

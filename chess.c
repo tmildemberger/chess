@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "chess_base.h"
 #include "chess_error.h"
@@ -58,16 +59,16 @@ ChessMove mkMove(ChessMatch *match, char *str){
     get1to8(str, &idx, &fromRow);
     getAtoH(str, &idx, &toCol);
     get1to8(str, &idx, &toRow);
-    printf("%c%c %c%c\n", fromCol, fromRow, toCol, toRow);
+    printf("%c%c %c%c", fromCol, fromRow, toCol, toRow);
     ChessSquare from = { fromCol - 'a', fromRow - '1' };
     ChessSquare to = { toCol - 'a', toRow - '1' };
     ChessPiece *piece = chess_piece_in_pos(match, from);
     ChessPiece *target = chess_piece_in_pos(match, to);
-    idx++;
-    targetType = str[idx];
+    targetType = str[idx];printf("%c\n", targetType != '\n'?targetType:' ');
     if (targetType == '\n'){
         if (target != NULL) pType = target->type;
-        else pType = piece->type;
+        else if (piece != NULL) pType = piece->type;
+        else pType = PAWN;
     } else {
         switch (targetType){
             case 'p':
@@ -90,7 +91,8 @@ ChessMove mkMove(ChessMatch *match, char *str){
                 break;
             default:
                 if (target != NULL) pType = target->type;
-                else pType = piece->type;
+                else if (piece != NULL) pType = piece->type;
+                else pType = PAWN;
         }
     }
     return chess_create_move(match, piece, to, pType);
@@ -99,20 +101,28 @@ ChessMove mkMove(ChessMatch *match, char *str){
 int readMove(ChessMatch *match, ChessMove *mv){
     char in[20];
     fgets(in, 20, stdin);
-    if (strcmp(in, "exit") == 0) return -1;
+    if (strcmp(in, "exit\n") == 0) return -1;
+    if (strlen(in) < 6) return 0;
+    if (in[0] < 'a' || in[0] > 'h' ||
+        in[1] < '1' || in[1] > '8' ||
+        in[2] != ' ' ||
+        in[3] < 'a' || in[3] > 'h' ||
+        in[4] < '1' || in[4] > '8') return 0;
     (*mv) = mkMove(match, in);
     if (mv->type == INVALID_MOVE) return 0;
     else return 1;
 }
 
 void print_all(ChessMatch *match){
-    unsigned i;
-    unsigned j;
+    unsigned i = 0;
+    unsigned j = 0;
     ChessPiece *pice;
 
     int black = 0;
 
     for (i = match->board.board_height-1; ; i--){
+        printf("   ---------------------------------\n");
+        printf(" %c | ", '1'+((char)i));
         for (j = 0; j < match->board.board_width; j++){
             if ( (pice = chess_piece_in_pos(match, (ChessSquare){j, i})) != NULL ){
                 switch (pice->type){
@@ -139,15 +149,18 @@ void print_all(ChessMatch *match){
                 if(black){
                     fputc('+', stdout);
                 } else {
-                    fputc('_', stdout);
+                    fputc(' ', stdout);
                 }
             }
+            printf(" | ");
             black = !black;
         }
         fputc('\n', stdout);
         black = !black;
         if (i == 0) break;
     }
+    printf("   ---------------------------------\n");
+    printf("     a   b   c   d   e   f   g   h \n");
 }
 
 int main(int argc, char *argv[]){
@@ -161,6 +174,7 @@ int main(int argc, char *argv[]){
         print_all(match);
         status = readMove(match, &move);
         if (status == 1){
+            printf("%d %d\n", move.type, move.targetType);
             printf("movimento valido. realizar movimento? (y/n)\n");
             in = 0;
             while (in != 'y' && in != 'n'){
@@ -172,6 +186,8 @@ int main(int argc, char *argv[]){
             }
         } else if (status == 0) {
             printf("esse movimento nao e legal, tente outro\n");
+            fgetc(stdin);
+            fflush(stdin);
         } else {
             break;
         }
