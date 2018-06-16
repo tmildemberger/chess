@@ -1,7 +1,7 @@
 #ifndef CHESS_BASE_H
 #define CHESS_BASE_H
 
-typedef enum pieces_type {  
+typedef enum pieces_type {
     PAWN = 0,
     ROOK,
     KNIGHT,
@@ -197,11 +197,22 @@ int chess_empty_squares(ChessMatch *play,
                         ChessSquare toSquare,
                         CheckType check);
 
+int chess_safe_squares(ChessMatch *play, 
+                       ChessSquare fromSquare,
+                       ChessSquare toSquare,
+                       CheckType check);
+
 int chess_ignore_squares(ChessMatch *play, 
                          ChessSquare fromSquare,
                          ChessSquare toSquare,
                          CheckType check);
 
 extern int (*chess_pieces_ranges[])(ChessMatch*, ChessSquare, ChessSquare, CheckType);
+
+ChessMoveList* chess_piece_possible_moves(ChessMatch *play,
+                                          ChessPiece *piece);
+
+ChessMoveList* chess_possible_moves_to(ChessMatch *play,
+                                       ChessSquare to);
 
 #endif
