@@ -48,13 +48,29 @@ ChessPiece* chess_find_piece_in_square(ChessPieceList *list, ChessSquare square)
     return NULL;
 }
 
-ChessPiece* chess_piece_index(ChessPieceList *list, int idx){
-    static int last_idx = 0;
+ChessPiece *chess_find_king(ChessPieceList *list, unsigned char team){
+    ChessPieceList *curr_section = list;
+    unsigned i;
+    do {
+        for (i = 0; i < curr_section->used_size; i++){
+            if (curr_section->pieces[i]->alive &&
+                curr_section->pieces[i]->team == team &&
+                curr_section->pieces[i]->type == KING ){
+                return curr_section->pieces[i];
+            }
+        }
+        curr_section = curr_section->nxt;
+    } while (curr_section != NULL);
+    return NULL;
+}
+
+ChessPiece* chess_piece_index(ChessPieceList *list, unsigned int idx){
+    static unsigned int last_idx = 0;
     static ChessPieceList *last_list = NULL;
     static ChessPieceList *last_section = NULL;
-    static int last_section_idx = 0;
+    static unsigned int last_section_idx = 0;
     static ChessPiece *last_piece = NULL;
-    if (idx < 0) return NULL;
+    // if (idx < 0) return NULL;
 
     if (list == last_list){
         if (idx == last_idx){
@@ -77,7 +93,7 @@ ChessPiece* chess_piece_index(ChessPieceList *list, int idx){
             return last_piece;
         } else if (idx > last_idx){
             ChessPieceList *curr_section = last_section;
-            int curr_idx = idx - last_idx + last_section_idx;
+            unsigned int curr_idx = idx - last_idx + last_section_idx;
             while (curr_idx > curr_section->used_size){
                 if (curr_section->nxt == NULL){
                     return NULL;
@@ -95,7 +111,7 @@ ChessPiece* chess_piece_index(ChessPieceList *list, int idx){
         }
     } else {
         ChessPieceList *curr_section = list;
-        int curr_idx = idx;
+        unsigned int curr_idx = idx;
         while (curr_idx > curr_section->used_size){
             if (curr_section->nxt == NULL){
                 return NULL;

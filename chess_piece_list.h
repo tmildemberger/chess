@@ -13,7 +13,9 @@ void chess_append_piece(ChessPieceList *list, ChessPiece *piece);
 
 ChessPiece* chess_find_piece_in_square(ChessPieceList *list, ChessSquare square);
 
-ChessPiece* chess_piece_index(ChessPieceList *list, int idx);
+ChessPiece *chess_find_king(ChessPieceList *list, unsigned char team);
+
+ChessPiece* chess_piece_index(ChessPieceList *list, unsigned int idx);
 
 void chess_destroy_last_piece(ChessPieceList *pieces);
 

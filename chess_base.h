@@ -215,4 +215,8 @@ ChessMoveList* chess_piece_possible_moves(ChessMatch *play,
 ChessMoveList* chess_possible_moves_to(ChessMatch *play,
                                        ChessSquare to);
 
+int chess_check_check();
+
+int chess_can_be_reached(ChessMatch *play, ChessPiece *piece, ChessSquare to);
+
 #endif
