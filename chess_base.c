@@ -465,6 +465,11 @@ void chess_put_piece_in(ChessPiece *piece, ChessSquare toSquare){
     piece->pos = toSquare;
 }
 
+void chess_unput_piece_in(ChessPiece *piece, ChessSquare toSquare){
+    piece->movs--;
+    piece->pos = toSquare;
+}
+
 int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
                             ChessSquare toSquare, 
                             int (*func)(ChessMatch*, ChessSquare)){
@@ -661,7 +666,7 @@ int chess_undo_invalid_move(ChessMatch *play,
 int chess_undo_normal_move(ChessMatch *play, 
                            ChessPiece *piece, 
                            ChessMove move){
-    chess_put_piece_in(piece, move.from);
+    chess_unput_piece_in(piece, move.from);
     return 1;
 }
 
@@ -672,7 +677,7 @@ int chess_undo_capture_move(ChessMatch *play,
                                 move.to, 
                                 move.targetType, 
                                 (piece->team + 1) % 2))->alive = 1;
-    chess_put_piece_in(piece, move.from);
+    chess_unput_piece_in(piece, move.from);
     return 1;
 }
 
@@ -682,11 +687,11 @@ int chess_undo_castling_move(ChessMatch *play,
     unsigned short lastCol = move.to.col - move.from.col > 0 ? 
                              play->board.board_width - 1 : 
                              0;
-    chess_put_piece_in(
+    chess_unput_piece_in(
         chess_piece_in_pos(play, 
         (ChessSquare){ lastCol ? move.to.col-1 : move.to.row+1, move.to.row }),
         (ChessSquare){ lastCol, move.to.row });
-    chess_put_piece_in(piece, move.from);
+    chess_unput_piece_in(piece, move.from);
     return 1;
 }
 
@@ -698,14 +703,14 @@ int chess_undo_en_passant_move(ChessMatch *play,
                                 unlucky,
                                 PAWN,
                                 (piece->team + 1) % 2))->alive = 1;
-    chess_put_piece_in(piece, move.from);
+    chess_unput_piece_in(piece, move.from);
     return 1;
 }
 
 int chess_undo_promotion_move(ChessMatch *play, 
                                ChessPiece *piece, 
                                ChessMove move){
-    chess_put_piece_in(piece, move.from);
+    chess_unput_piece_in(piece, move.from);
     piece->type = PAWN;
     return 1;
 }

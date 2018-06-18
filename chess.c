@@ -8,7 +8,7 @@
 #include "chess_piece_list.h"
 #include "chess_vpiece_list.h"
 
-#define CLI 1
+#define CLI 0
 
 #if CLI == 1
 
@@ -203,76 +203,6 @@ int main(){//int argc, char *argv[]){
     ChessMatch *match = chess_new_game();
 
     unsigned i;
-    unsigned j;
-
-    ChessPiece *pice = chess_piece_in_pos(match, 0, 1);
-    ChessMove *mv = chess_create_move(match, pice, 0, 3);
-    chess_apply_move(match, mv);
-    chess_destroy_move(mv);
-
-    pice = chess_piece_in_pos(match, 0, 6);
-    mv = chess_create_move(match, pice, 0, 5);
-    chess_apply_move(match, mv);
-    chess_destroy_move(mv);
-
-    pice = chess_piece_in_pos(match, 0, 3);
-    mv = chess_create_move(match, pice, 0, 4);
-    chess_apply_move(match, mv);
-    chess_destroy_move(mv);
-
-    pice = chess_piece_in_pos(match, 1, 6);
-    mv = chess_create_move(match, pice, 1, 4);
-    chess_apply_move(match, mv);
-    chess_destroy_move(mv);
-
-    pice = chess_piece_in_pos(match, 0, 0);
-    mv = chess_create_move(match, pice, 0, 3);
-    chess_apply_move(match, mv);
-    chess_destroy_move(mv);
-
-    int black = 0;
-
-    for (i = match->board.board_height-1; ; i--){
-        for (j = 0; j < match->board.board_width; j++){
-            if ( (pice = chess_piece_in_pos(match, j, i)) != NULL ){
-                switch (pice->type){
-                    case PAWN:
-                        fputc( (pice->team) == WHITE ? 'P' : 'p', stdout);
-                        break;
-                    case ROOK:
-                        fputc( (pice->team) == WHITE ? 'R' : 'r', stdout);
-                        break;
-                    case KNIGHT:
-                        fputc( (pice->team) == WHITE ? 'N' : 'n', stdout);
-                        break;
-                    case BISHOP:
-                        fputc( (pice->team) == WHITE ? 'B' : 'b', stdout);
-                        break;
-                    case QUEEN:
-                        fputc( (pice->team) == WHITE ? 'Q' : 'q', stdout);
-                        break;
-                    case KING:
-                        fputc( (pice->team) == WHITE ? 'K' : 'k', stdout);
-                        break;
-                }
-            } else {
-                if(black){
-                    fputc('+', stdout);
-                } else {
-                    fputc('_', stdout);
-                }
-            }
-            black = !black;
-        }
-        fputc('\n', stdout);
-        black = !black;
-        if (i == 0) break;
-    }
-    
-
-
-
-
 
     ALLEGRO_DISPLAY         *display;
     ALLEGRO_DISPLAY_MODE    disp_data;
@@ -415,7 +345,7 @@ int main(){//int argc, char *argv[]){
     al_draw_line(-0.5, 640.5, 640.5, 640.5, light_square_color, 1.0);
     al_draw_line(640.5, -0.5, 640.5, 640.5, light_square_color, 1.0);
 
-    black = 0;
+    int black = 0;
     for (i = 0; i < 64; i++){
         if (black){
             black = !black;
@@ -484,26 +414,39 @@ int main(){//int argc, char *argv[]){
                 || (r == PIECE_WHITE_R && g == PIECE_WHITE_G && b == PIECE_WHITE_B)){
                     dragging = chess_find_vpiece_with_piece(visual_head,
                         chess_piece_in_pos(match,
-                        (event.mouse.x - (disp_data.width-640)/2 ) / 80,
-                        match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)));
+                        (ChessSquare){ ( event.mouse.x - (disp_data.width-640)/2 ) / 80, 
+                        match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)}));
                     x_diff = dragging->x - event.mouse.x;
                     y_diff = dragging->y - event.mouse.y;
                 }
              }
 
         } else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP){
+            if (dragging){
+                ChessSquare toSquare = {
+                (event.mouse.x - (disp_data.width-640)/2 ) / 80,
+                match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)};
 
-            ChessMove *move = chess_create_move(match, dragging->piece, 
-                    (event.mouse.x - (disp_data.width-640)/2 ) / 80,
-                    match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80));
-            chess_apply_move(match, move);
-            chess_destroy_move(move);
+                ChessPiece *piece = dragging->piece;
+                ChessPiece *target = chess_piece_in_pos(match, toSquare);
+                PiecesType pType = PAWN;
+                if (target != NULL) pType = target->type;
+                else if (piece != NULL) pType = piece->type;
 
-            dragging->x = dragging->piece->pos.col*80+(disp_data.width-640)/2;
-            dragging->y = (match->board.board_height-1-dragging->piece->pos.row)*80+(disp_data.height-640)/2;
+                ChessMove move = chess_create_move(match,
+                                                   dragging->piece,
+                                                   toSquare,
+                                                   pType);
+                chess_apply_move(match, move);
+                if (chess_is_checkmate(match)){
+                    go_away = 1;                    
+                }
 
-            dragging = NULL;
+                dragging->x = dragging->piece->pos.col*80+(disp_data.width-640)/2;
+                dragging->y = (match->board.board_height-1-dragging->piece->pos.row)*80+(disp_data.height-640)/2;
 
+                dragging = NULL;
+            }
         }
 
         if (redraw && al_is_event_queue_empty(events_qu)){

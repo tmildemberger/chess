@@ -184,6 +184,7 @@ int chess_apply_en_passant_move(ChessMatch*, ChessPiece*, ChessMove);
 int chess_apply_promotion_move(ChessMatch*, ChessPiece*, ChessMove);
 
 void chess_put_piece_in(ChessPiece *piece, ChessSquare toSquare);
+void chess_unput_piece_in(ChessPiece *piece, ChessSquare toSquare);
 
 extern int (*chess_apply_moves[])(ChessMatch*, ChessPiece*, ChessMove);
 
