@@ -33,6 +33,10 @@ const int PIECE_BLACK_G = 54;
 const int PIECE_BLACK_B = 2;
 #endif
 
+void my_flush(void){
+    while (getchar() != '\n');
+}
+
 void getAtoH(char *s, int *i, char *c){
     while ((*c) < 'a' || (*c) > 'h') {
         (*c) = s[*i];
@@ -163,7 +167,7 @@ void print_all(ChessMatch *match){
     printf("     a   b   c   d   e   f   g   h \n");
 }
 
-int main(int argc, char *argv[]){
+int main(){//int argc, char *argv[]){
     
 #if CLI == 1
     ChessMatch *match = chess_new_game();
@@ -179,20 +183,22 @@ int main(int argc, char *argv[]){
             in = 0;
             while (in != 'y' && in != 'n'){
                 in = fgetc(stdin);
-                fflush(stdin);
+                my_flush();
             }
             if (in == 'y') {
                 chess_apply_move(match, move);
+                if (chess_is_checkmate(match)) break;
             }
         } else if (status == 0) {
             printf("esse movimento nao e legal, tente outro\n");
-            fgetc(stdin);
-            fflush(stdin);
+            if (fgetc(stdin) != '\n')
+                my_flush();
         } else {
             break;
         }
     }
 
+    chess_game_over(match);
 #else
     ChessMatch *match = chess_new_game();
 

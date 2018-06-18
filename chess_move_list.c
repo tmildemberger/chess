@@ -32,6 +32,23 @@ void chess_append_move(ChessMoveList *list, ChessMove move){
     } while (1);
 }
 
+void chess_append_move_section(ChessMoveList *list, ChessMoveList *section){
+    ChessMoveList *curr_section = list;
+    while (curr_section->nxt != NULL)
+        curr_section = curr_section->nxt;
+    curr_section->nxt = section;
+}
+
+int chess_count_moves(ChessMoveList *list){
+    int count = 0;
+    ChessMoveList *curr_section = list;
+    while (curr_section != NULL){
+        count += curr_section->used_size;
+        curr_section = curr_section->nxt;
+    }
+    return count;
+}
+
 ChessMove chess_last_move(ChessMoveList *list){
     ChessMoveList *curr_section = list;
     if (curr_section->used_size == 0)
@@ -39,6 +56,27 @@ ChessMove chess_last_move(ChessMoveList *list){
     while (curr_section->nxt != NULL)
         curr_section = curr_section->nxt;
     return curr_section->moves[curr_section->used_size-1];
+}
+
+void chess_remove_last_move(ChessMoveList *list){
+    ChessMoveList *curr_section = list;
+    ChessMoveList *last_section = NULL;
+    if (curr_section->used_size == 0)
+        return;
+    while (curr_section->nxt != NULL){
+        last_section = curr_section;
+        curr_section = curr_section->nxt;
+    }
+    curr_section->used_size--;
+    curr_section->moves[curr_section->used_size] = (ChessMove){ (ChessSquare){ 0, 0 },
+                                                                (ChessSquare){ 0, 0 },
+                                                                0,
+                                                                0 };
+    if (curr_section->used_size == 0 &&
+        last_section != NULL){
+        free(curr_section);
+        last_section->nxt = NULL;
+    }
 }
 
 void chess_destroy_move_list(ChessMoveList* moves){

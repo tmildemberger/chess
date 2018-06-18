@@ -48,6 +48,27 @@ ChessPiece* chess_find_piece_in_square(ChessPieceList *list, ChessSquare square)
     return NULL;
 }
 
+ChessPiece* chess_find_not_alive_piece(ChessPieceList *list, 
+                                       ChessSquare square, 
+                                       PiecesType pType,
+                                       unsigned char team){
+    ChessPieceList *curr_section = list;
+    unsigned i;
+    do {
+        for (i = 0; i < curr_section->used_size; i++){
+            if (curr_section->pieces[i]->alive == 0 &&
+                curr_section->pieces[i]->type == pType &&
+                curr_section->pieces[i]->team == team &&
+                curr_section->pieces[i]->pos.col == square.col &&
+                curr_section->pieces[i]->pos.row == square.row ){
+                return curr_section->pieces[i];
+            }
+        }
+        curr_section = curr_section->nxt;
+    } while (curr_section != NULL);
+    return NULL;
+}
+
 ChessPiece *chess_find_king(ChessPieceList *list, unsigned char team){
     ChessPieceList *curr_section = list;
     unsigned i;
@@ -94,7 +115,7 @@ ChessPiece* chess_piece_index(ChessPieceList *list, unsigned int idx){
         } else if (idx > last_idx){
             ChessPieceList *curr_section = last_section;
             unsigned int curr_idx = idx - last_idx + last_section_idx;
-            while (curr_idx > curr_section->used_size){
+            while (curr_idx >= curr_section->used_size){
                 if (curr_section->nxt == NULL){
                     return NULL;
                 }
@@ -112,7 +133,7 @@ ChessPiece* chess_piece_index(ChessPieceList *list, unsigned int idx){
     } else {
         ChessPieceList *curr_section = list;
         unsigned int curr_idx = idx;
-        while (curr_idx > curr_section->used_size){
+        while (curr_idx >= curr_section->used_size){
             if (curr_section->nxt == NULL){
                 return NULL;
             }

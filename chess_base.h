@@ -147,7 +147,6 @@ int chess_friendly_fire(ChessMatch *play,
 
 void chess_game_over(ChessMatch *play);
 void chess_destroy_piece(ChessPiece *pic);
-void chess_destroy_move(ChessMove *move);
 
 MoveType chess_no_special(ChessMatch*, ChessPiece*, ChessMove);
 MoveType chess_en_passant(ChessMatch*, ChessPiece*, ChessMove);
@@ -215,8 +214,23 @@ ChessMoveList* chess_piece_possible_moves(ChessMatch *play,
 ChessMoveList* chess_possible_moves_to(ChessMatch *play,
                                        ChessSquare to);
 
-int chess_check_check();
+void chess_undo_last_move(ChessMatch *play);
+
+int chess_in_check(ChessMatch *play, unsigned char team);
 
 int chess_can_be_reached(ChessMatch *play, ChessPiece *piece, ChessSquare to);
+
+int chess_undo_invalid_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_undo_normal_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_undo_capture_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_undo_castling_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_undo_en_passant_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_undo_promotion_move(ChessMatch*, ChessPiece*, ChessMove);
+
+extern int (*chess_undo_moves[])(ChessMatch*, ChessPiece*, ChessMove);
+
+ChessMoveList* chess_every_possible_move(ChessMatch *play);
+
+int chess_is_checkmate(ChessMatch *play);
 
 #endif
