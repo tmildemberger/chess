@@ -8,7 +8,7 @@
 #include "chess_piece_list.h"
 #include "chess_vpiece_list.h"
 
-#define CLI 0
+#define CLI 1
 
 #if CLI == 1
 
@@ -147,6 +147,8 @@ void print_all(ChessMatch *match){
                         break;
                     case KING:
                         fputc( (pice->team) == WHITE ? 'K' : 'k', stdout);
+                        break;
+                    case NOTHING:
                         break;
                 }
             } else {
@@ -444,6 +446,16 @@ int main(){//int argc, char *argv[]){
 
                 dragging->x = dragging->piece->pos.col*80+(disp_data.width-640)/2;
                 dragging->y = (match->board.board_height-1-dragging->piece->pos.row)*80+(disp_data.height-640)/2;
+
+                ChessVisualPiece *vpiece = NULL;
+                i = 0;
+                for (vpiece = chess_v_piece_index(visual_head, i);
+                     vpiece != NULL;
+                     vpiece = chess_v_piece_index(visual_head, ++i)){
+
+                    vpiece->x = vpiece->piece->pos.col*80+(disp_data.width-640)/2;
+                    vpiece->y = (match->board.board_height-1-vpiece->piece->pos.row)*80+(disp_data.height-640)/2;
+                }
 
                 dragging = NULL;
             }

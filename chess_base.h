@@ -2,6 +2,7 @@
 #define CHESS_BASE_H
 
 typedef enum pieces_type {
+    NOTHING = -1,
     PAWN = 0,
     ROOK,
     KNIGHT,
@@ -71,6 +72,7 @@ typedef struct move{
     ChessSquare to;
     MoveType type;
     PiecesType targetType;
+    PiecesType promotionType;
 } ChessMove;
 
 typedef struct visual_piece {

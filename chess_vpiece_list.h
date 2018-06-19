@@ -13,6 +13,8 @@ void chess_append_vpiece(ChessVPieceList *list, ChessVisualPiece *vpiece);
 
 ChessVisualPiece* chess_find_vpiece_with_piece(ChessVPieceList *list, ChessPiece *piece);
 
+ChessVisualPiece* chess_v_piece_index(ChessVPieceList *list, unsigned int idx);
+
 void chess_destroy_vpiece_list(ChessVPieceList *vpieces);
 
 #endif

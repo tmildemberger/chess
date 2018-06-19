@@ -252,7 +252,8 @@ MoveType chess_promotion_move(ChessMatch *play,
     int dx = move.to.col - piece->pos.col;
     int dy = move.to.row - piece->pos.row;
     if (move.to.row == lastRow && 
-        chess_pawn_ok_normal(piece, dx, dy))
+        (chess_pawn_ok_normal(piece, dx, dy) ||
+        chess_pawn_ok_capture(piece, dx, dy)))
         return PROMOTION_MOVE;
     else 
         return INVALID_MOVE;
@@ -453,6 +454,8 @@ int chess_apply_en_passant_move(ChessMatch *play,
 int chess_apply_promotion_move(ChessMatch *play, 
                                ChessPiece *piece, 
                                ChessMove move){
+    ChessPiece *target = chess_piece_in_pos(play, move.to);
+    if (target) target->alive = 0;
     chess_put_piece_in(piece, move.to);
     piece->type = move.targetType != PAWN ?
                   move.targetType :

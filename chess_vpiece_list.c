@@ -46,6 +46,71 @@ ChessVisualPiece* chess_find_vpiece_with_piece(ChessVPieceList *list, ChessPiece
     return NULL;
 }
 
+ChessVisualPiece* chess_v_piece_index(ChessVPieceList *list, unsigned int idx){
+    static unsigned int last_idx = 0;
+    static ChessVPieceList *last_list = NULL;
+    static ChessVPieceList *last_section = NULL;
+    static unsigned int last_section_idx = 0;
+    static ChessVisualPiece *last_v_piece = NULL;
+    // if (idx < 0) return NULL;
+
+    if (list == last_list){
+        if (idx == last_idx){
+            return last_v_piece;
+        } else if (idx - last_idx < last_section->used_size - last_section_idx){
+            last_section_idx = last_section_idx + idx - last_idx;
+            last_idx = idx;
+            last_v_piece = last_section->vpieces[last_section_idx];
+            return last_v_piece;
+        } else if (last_idx - idx <= last_section_idx){
+            last_section_idx = last_section_idx - last_idx + idx;
+            last_idx = idx;
+            last_v_piece = last_section->vpieces[last_section_idx];
+            return last_v_piece;
+        } else if (idx < list->used_size){
+            last_section =  list;
+            last_section_idx = idx;
+            last_idx = idx;
+            last_v_piece = last_section->vpieces[last_section_idx];
+            return last_v_piece;
+        } else if (idx > last_idx){
+            ChessVPieceList *curr_section = last_section;
+            unsigned int curr_idx = idx - last_idx + last_section_idx;
+            while (curr_idx >= curr_section->used_size){
+                if (curr_section->nxt == NULL){
+                    return NULL;
+                }
+                curr_idx -= curr_section->used_size;
+                curr_section = curr_section->nxt;
+            }
+            last_section = curr_section;
+            last_section_idx = curr_idx;
+            last_idx = idx;
+            last_v_piece = last_section->vpieces[last_section_idx];
+            return last_v_piece;
+        } else if (idx < last_idx){
+            return NULL;
+        }
+    } else {
+        ChessVPieceList *curr_section = list;
+        unsigned int curr_idx = idx;
+        while (curr_idx >= curr_section->used_size){
+            if (curr_section->nxt == NULL){
+                return NULL;
+            }
+            curr_idx -= curr_section->used_size;
+            curr_section = curr_section->nxt;
+        }
+        last_list = list;
+        last_section = curr_section;
+        last_section_idx = curr_idx;
+        last_idx = idx;
+        last_v_piece = last_section->vpieces[last_section_idx];
+        return last_v_piece;
+    }
+    return NULL;
+}
+
 void chess_destroy_vpiece_list(ChessVPieceList *vpieces){
     /**
      * passar por todas as vpeças destruindo-as
