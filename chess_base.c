@@ -2,6 +2,9 @@
 #include "chess_piece_list.h"
 #include "chess_move_list.h"
 
+#include <time.h>
+#include <stdlib.h>
+
 MoveType (*chess_special_moves[])(ChessMatch*, ChessPiece*, ChessMove) = {
     chess_pawn_specials,
     chess_no_special,
@@ -29,16 +32,17 @@ int (*chess_capture_moves[])(ChessPiece*, int, int) = {
     chess_king_ok_move
 };
 
-int (*chess_apply_moves[])(ChessMatch*, ChessPiece*, ChessMove) = {
+int (*chess_apply_moves[])(ChessMatch*, ChessPiece*, ChessMove*) = {
     chess_apply_invalid_move,
     chess_apply_normal_move,
     chess_apply_capture_move,
     chess_apply_castling_move,
     chess_apply_en_passant_move,
-    chess_apply_promotion_move
+    chess_apply_promotion_move,
+    chess_apply_promotion_capture_move
 };
 
-int (*chess_pieces_ranges[])(ChessMatch*, ChessSquare, ChessSquare, CheckType) = {
+int (*chess_pieces_jumps[])(ChessMatch*, ChessSquare, ChessSquare, CheckType) = {
     chess_empty_squares,
     chess_empty_squares,
     chess_ignore_squares,
@@ -53,13 +57,15 @@ int (*chess_undo_moves[])(ChessMatch*, ChessPiece*, ChessMove) = {
     chess_undo_capture_move,
     chess_undo_castling_move,
     chess_undo_en_passant_move,
-    chess_undo_promotion_move
+    chess_undo_promotion_move,
+    chess_undo_promotion_capture_move
 };
 
 /**
  * Primeira função a ser chamada - cria um novo jogo
  */
 ChessMatch* chess_new_game(void){
+    srand(time(NULL));
     /**
      * por causa do calloc, o 'nxt' do 'not_alive_head' do
      * new_match já é inicializado com NULL (lista vazia)
@@ -143,11 +149,10 @@ ChessPiece* chess_piece_in_pos(ChessMatch *play, ChessSquare square){
  */
 ChessMove chess_create_move(ChessMatch *play, 
                             ChessPiece *piece,
-                            ChessSquare toSquare,
-                            PiecesType targetType){
+                            ChessSquare toSquare){
 
     ChessPiece *target = chess_piece_in_pos(play, toSquare);
-    ChessMove move;
+    ChessMove move = {{0, 0}, {0, 0}, 0, 0, 0};
     if (piece == NULL ||
         //chess_piece_cant_move(play, piece) ||
         chess_square_outside_board(play, toSquare) ||
@@ -159,10 +164,9 @@ ChessMove chess_create_move(ChessMatch *play,
     }
     move.from = piece->pos;
     move.to = toSquare;
-    move.targetType = targetType;
     move.type = chess_analize_move(play, piece, move);
     if (move.type != INVALID_MOVE){
-        chess_apply_move(play, move);
+        chess_apply_move(play, &move);
         if (chess_in_check(play, piece->team)){
             move.type = INVALID_MOVE;
         }
@@ -252,9 +256,23 @@ MoveType chess_promotion_move(ChessMatch *play,
     int dx = move.to.col - piece->pos.col;
     int dy = move.to.row - piece->pos.row;
     if (move.to.row == lastRow && 
-        (chess_pawn_ok_normal(piece, dx, dy) ||
-        chess_pawn_ok_capture(piece, dx, dy)))
-        return PROMOTION_MOVE;
+        chess_pawn_ok_normal(piece, dx, dy))
+        return PROMOTION_NORMAL_MOVE;
+    else 
+        return INVALID_MOVE;
+}
+
+MoveType chess_promotion_capture_move(ChessMatch *play, 
+                                      ChessPiece *piece, 
+                                      ChessMove move){
+    unsigned short lastRow = piece->heading > 0 ? 
+                             play->board.board_height - 1 : 
+                             0;
+    int dx = move.to.col - piece->pos.col;
+    int dy = move.to.row - piece->pos.row;
+    if (move.to.row == lastRow && 
+        chess_pawn_ok_capture(piece, dx, dy))
+        return PROMOTION_CAPTURE_MOVE;
     else 
         return INVALID_MOVE;
 }
@@ -264,7 +282,9 @@ MoveType chess_pawn_specials(ChessMatch *play,
                              ChessMove move){
     MoveType type = chess_en_passant(play, piece, move);
     if (type != INVALID_MOVE) return type;
-    return chess_promotion_move(play, piece, move);
+    type = chess_promotion_move(play, piece, move);
+    if (type != INVALID_MOVE) return type;
+    return chess_promotion_capture_move(play, piece, move);
 }
 
 MoveType chess_special_check(ChessMatch *play, 
@@ -281,13 +301,13 @@ MoveType chess_other_check(ChessMatch *play,
     int dy = move.to.row - piece->pos.row;
     if (target != NULL){
         return //move.targetType == target->type &&
-               chess_pieces_ranges[piece->type](play, move.from, move.to, NO_LAST) &&
+               chess_pieces_jumps[piece->type](play, move.from, move.to, NO_LAST) &&
                chess_capture_moves[piece->type](piece, dx, dy) ? 
                CAPTURE_MOVE : 
                INVALID_MOVE;
     } else {
         return //move.targetType == piece->type &&
-               chess_pieces_ranges[piece->type](play, move.from, move.to, LAST) &&
+               chess_pieces_jumps[piece->type](play, move.from, move.to, LAST) &&
                chess_normal_moves[piece->type](piece, dx, dy) ?
                NORMAL_MOVE :
                INVALID_MOVE;
@@ -298,13 +318,13 @@ MoveType chess_other_check(ChessMatch *play,
  * no tabuleiro enviado, realiza uma jogada que se
  * presume ser válida
  */
-void chess_apply_move(ChessMatch *play, ChessMove move){
-    ChessPiece *piece = chess_piece_in_pos(play, move.from);
-    if (chess_apply_moves[move.type](play, piece, move)){
+void chess_apply_move(ChessMatch *play, ChessMove *move){
+    ChessPiece *piece = chess_piece_in_pos(play, move->from);
+    if (chess_apply_moves[move->type](play, piece, move)){
         play->board.movements++;
         play->board.turn++;
         play->board.turn %= 2;
-        chess_append_move(play->record, move);
+        chess_append_move(play->record, (*move));
     }
 }
 
@@ -405,60 +425,75 @@ int chess_queen_ok_move(ChessPiece *piece, int dx, int dy){
 }
 
 int chess_king_ok_move(ChessPiece *piece, int dx, int dy){
+    dx = dx>0 ? dx : -dx;
+    dy = dy>0 ? dy : -dy;
     return dx <= 1 && dy <= 1;
 }
 
 int chess_apply_invalid_move(ChessMatch *play, 
                              ChessPiece *piece, 
-                             ChessMove move){
+                             ChessMove *move){
     return 0;
 }
 
 int chess_apply_normal_move(ChessMatch *play, 
                             ChessPiece *piece, 
-                            ChessMove move){
-    chess_put_piece_in(piece, move.to);
+                            ChessMove *move){
+    chess_put_piece_in(piece, move->to);
     return 1;
 }
 
 int chess_apply_capture_move(ChessMatch *play, 
                              ChessPiece *piece, 
-                             ChessMove move){
-    (chess_piece_in_pos(play, move.to))->alive = 0;
-    chess_put_piece_in(piece, move.to);
+                             ChessMove *move){
+    ChessPiece *target = chess_piece_in_pos(play, move->to);
+    target->alive = 0;
+    move->targetType = target->type;
+    chess_put_piece_in(piece, move->to);
     return 1;
 }
 
 int chess_apply_castling_move(ChessMatch *play, 
                               ChessPiece *piece, 
-                              ChessMove move){
-    unsigned short lastCol = move.to.col - move.from.col > 0 ? 
+                              ChessMove *move){
+    unsigned short lastCol = move->to.col - move->from.col > 0 ? 
                              play->board.board_width - 1 : 
                              0;
     chess_put_piece_in(
-        chess_piece_in_pos(play, (ChessSquare){ lastCol, move.to.row }),
-        (ChessSquare){ lastCol ? move.to.col-1 : move.to.row+1, move.to.row });
-    chess_put_piece_in(piece, move.to);
+        chess_piece_in_pos(play, (ChessSquare){ lastCol, move->to.row }),
+        (ChessSquare){ lastCol ? move->to.col-1 : move->to.row+1, move->to.row });
+    chess_put_piece_in(piece, move->to);
     return 1;
 }
 
 int chess_apply_en_passant_move(ChessMatch *play, 
                                 ChessPiece *piece, 
-                                ChessMove move){
-    ChessSquare unlucky = { move.to.col, move.from.row };
+                                ChessMove *move){
+    ChessSquare unlucky = { move->to.col, move->from.row };
     (chess_piece_in_pos(play, unlucky))->alive = 0;
-    chess_put_piece_in(piece, move.to);
+    chess_put_piece_in(piece, move->to);
     return 1;
 }
 
 int chess_apply_promotion_move(ChessMatch *play, 
                                ChessPiece *piece, 
-                               ChessMove move){
-    ChessPiece *target = chess_piece_in_pos(play, move.to);
-    if (target) target->alive = 0;
-    chess_put_piece_in(piece, move.to);
-    piece->type = move.targetType != PAWN ?
-                  move.targetType :
+                               ChessMove *move){
+    chess_put_piece_in(piece, move->to);
+    piece->type = move->promotionType != PAWN ?
+                  move->promotionType :
+                  QUEEN;
+    return 1;
+}
+
+int chess_apply_promotion_capture_move(ChessMatch *play, 
+                                       ChessPiece *piece, 
+                                       ChessMove *move){
+    ChessPiece *target = chess_piece_in_pos(play, move->to);
+    target->alive = 0;
+    move->targetType = target->type;
+    chess_put_piece_in(piece, move->to);
+    piece->type = move->promotionType != PAWN ?
+                  move->promotionType :
                   QUEEN;
     return 1;
 }
@@ -593,23 +628,21 @@ ChessMoveList* chess_piece_possible_moves(ChessMatch *play,
     }
     ChessMove move;
     int row, col;
-    PiecesType pType;
     for (row = 0; row < play->board.board_height; row++){
         for (col = 0; col < play->board.board_width; col++){
             ChessSquare to = { col, row };
-            ChessPiece *target = chess_piece_in_pos(play, to);
             
             //se mudar a maneira que o tipo da peça funciona
             //isso precisará ser mudado
-            if (target != NULL) pType = target->type;
-            else if (piece != NULL) pType = piece->type;
-            else pType = PAWN;
-            move = chess_create_move(play, piece, to, pType);
+
+            //^previsão correta. alterado:
+            move = chess_create_move(play, piece, to);
             if (move.type != INVALID_MOVE){
-                if (move.type == PROMOTION_MOVE){
-                    move.targetType = QUEEN;
-                    chess_append_move(possible_moves, 
-                                      (ChessMove){ move.from, move.to, move.type, KNIGHT});
+                if (move.type == PROMOTION_NORMAL_MOVE ||
+                    move.type == PROMOTION_CAPTURE_MOVE){
+                    chess_promote_to(&move, KNIGHT);
+                    chess_append_move(possible_moves, move);
+                    chess_promote_to(&move, QUEEN);
                 }
                 chess_append_move(possible_moves, move);
             }
@@ -625,7 +658,6 @@ ChessMoveList* chess_possible_moves_to(ChessMatch *play,
     ChessPiece *piece;
     ChessMove move;
     int i = 0;
-    int pc;
     for (piece = chess_piece_index(play->board.pieces, i);
          piece == NULL;
          piece = chess_piece_index(play->board.pieces, ++i)){
@@ -635,11 +667,16 @@ ChessMoveList* chess_possible_moves_to(ChessMatch *play,
             chess_not_in_your_turn(play, piece)){
             continue;
         }
-        for (pc = PAWN; pc <= KING; pc++){
-            move = chess_create_move(play, piece, to, pc);
-            if (move.type != INVALID_MOVE){
+        
+        move = chess_create_move(play, piece, to);
+        if (move.type != INVALID_MOVE){
+            if (move.type == PROMOTION_NORMAL_MOVE ||
+                move.type == PROMOTION_CAPTURE_MOVE){
+                chess_promote_to(&move, KNIGHT);
                 chess_append_move(possible_moves, move);
+                chess_promote_to(&move, QUEEN);
             }
+            chess_append_move(possible_moves, move);
         }
     }
     return possible_moves;
@@ -704,7 +741,7 @@ int chess_undo_en_passant_move(ChessMatch *play,
     ChessSquare unlucky = { move.to.col, move.from.row };
     (chess_find_not_alive_piece(play->board.pieces,
                                 unlucky,
-                                PAWN,
+                                move.targetType, // == PAWN
                                 (piece->team + 1) % 2))->alive = 1;
     chess_unput_piece_in(piece, move.from);
     return 1;
@@ -718,8 +755,20 @@ int chess_undo_promotion_move(ChessMatch *play,
     return 1;
 }
 
+int chess_undo_promotion_capture_move(ChessMatch *play, 
+                                      ChessPiece *piece, 
+                                      ChessMove move){
+    (chess_find_not_alive_piece(play->board.pieces, 
+                                move.to, 
+                                move.targetType, 
+                                (piece->team + 1) % 2))->alive = 1;
+    chess_unput_piece_in(piece, move.from);
+    piece->type = PAWN;
+    return 1;
+}
+
 int chess_can_be_reached(ChessMatch *play, ChessPiece *piece, ChessSquare to){
-    ChessMove move = { piece->pos, to, INVALID_MOVE, 0 };
+    ChessMove move = { piece->pos, to, INVALID_MOVE, 0, 0 };
     ChessPiece *target = chess_piece_in_pos(play, to);
     if (piece == NULL ||
         chess_square_outside_board(play, to) ||
@@ -798,7 +847,29 @@ ChessMoveList* chess_every_possible_move(ChessMatch *play){
 int chess_is_checkmate(ChessMatch *play){
     if (!chess_in_check(play, play->board.turn)) return 0;
     
-    if (chess_count_moves(chess_every_possible_move(play)) == 0) return 1;
+    ChessMoveList *possible_moves = chess_every_possible_move(play);
+    if (chess_count_moves(possible_moves) == 0) {
+        chess_destroy_move_list(possible_moves);
+        return 1;
+    }
 
+    chess_destroy_move_list(possible_moves);
     return 0;
+}
+
+void chess_promote_to(ChessMove *move, PiecesType promotionType){
+    if (move->type == PROMOTION_NORMAL_MOVE ||
+        move->type == PROMOTION_CAPTURE_MOVE){
+        move->promotionType = promotionType;
+    }
+}
+
+void chess_choose_and_apply_random(ChessMatch *play){
+    ChessMoveList *possible_moves = chess_every_possible_move(play);
+    int tam = chess_count_moves(possible_moves);
+    if (tam > 0){
+        ChessMove move = chess_move_index(possible_moves, rand()%tam);
+        chess_apply_move(play, &move);
+    }
+    chess_destroy_move_list(possible_moves);
 }

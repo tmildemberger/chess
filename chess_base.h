@@ -2,7 +2,6 @@
 #define CHESS_BASE_H
 
 typedef enum pieces_type {
-    NOTHING = -1,
     PAWN = 0,
     ROOK,
     KNIGHT,
@@ -40,7 +39,8 @@ typedef enum move_type {
     CAPTURE_MOVE,
     CASTLING_MOVE,
     EN_PASSANT_MOVE,
-    PROMOTION_MOVE
+    PROMOTION_NORMAL_MOVE,
+    PROMOTION_CAPTURE_MOVE
 } MoveType;
 
 #include "chess_error.h"
@@ -128,13 +128,12 @@ ChessPiece* chess_new_piece(char col, char row, PiecesType name, char team);
 ChessPiece* chess_piece_in_pos(ChessMatch *play, ChessSquare square);
 ChessMove chess_create_move(ChessMatch *play, 
                             ChessPiece *piece,
-                            ChessSquare toSquare,
-                            PiecesType targetType);
+                            ChessSquare toSquare);
 int chess_piece_cant_move(ChessMatch *play, ChessPiece *piece);
 MoveType chess_analize_move(ChessMatch *play, 
                             ChessPiece *piece,
                             ChessMove move);
-void chess_apply_move(ChessMatch *play, ChessMove move);
+void chess_apply_move(ChessMatch *play, ChessMove *move);
 int chess_squares_satifies(ChessMatch *play, ChessSquare fromSquare,
                             ChessSquare toSquare, 
                             int (*func)(ChessMatch*, ChessSquare));
@@ -154,6 +153,7 @@ MoveType chess_no_special(ChessMatch*, ChessPiece*, ChessMove);
 MoveType chess_en_passant(ChessMatch*, ChessPiece*, ChessMove);
 MoveType chess_castling_move(ChessMatch*, ChessPiece*, ChessMove);
 MoveType chess_promotion_move(ChessMatch*, ChessPiece*, ChessMove);
+MoveType chess_promotion_capture_move(ChessMatch*, ChessPiece*, ChessMove);
 MoveType chess_pawn_specials(ChessMatch*, ChessPiece*, ChessMove);
 
 extern MoveType (*chess_special_moves[])(ChessMatch*, ChessPiece*, ChessMove);
@@ -178,17 +178,18 @@ extern int (*chess_normal_moves[])(ChessPiece*, int, int);
 
 extern int (*chess_capture_moves[])(ChessPiece*, int, int);
 
-int chess_apply_invalid_move(ChessMatch*, ChessPiece*, ChessMove);
-int chess_apply_normal_move(ChessMatch*, ChessPiece*, ChessMove);
-int chess_apply_capture_move(ChessMatch*, ChessPiece*, ChessMove);
-int chess_apply_castling_move(ChessMatch*, ChessPiece*, ChessMove);
-int chess_apply_en_passant_move(ChessMatch*, ChessPiece*, ChessMove);
-int chess_apply_promotion_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_apply_invalid_move(ChessMatch*, ChessPiece*, ChessMove*);
+int chess_apply_normal_move(ChessMatch*, ChessPiece*, ChessMove*);
+int chess_apply_capture_move(ChessMatch*, ChessPiece*, ChessMove*);
+int chess_apply_castling_move(ChessMatch*, ChessPiece*, ChessMove*);
+int chess_apply_en_passant_move(ChessMatch*, ChessPiece*, ChessMove*);
+int chess_apply_promotion_move(ChessMatch*, ChessPiece*, ChessMove*);
+int chess_apply_promotion_capture_move(ChessMatch*, ChessPiece*, ChessMove*);
 
 void chess_put_piece_in(ChessPiece *piece, ChessSquare toSquare);
 void chess_unput_piece_in(ChessPiece *piece, ChessSquare toSquare);
 
-extern int (*chess_apply_moves[])(ChessMatch*, ChessPiece*, ChessMove);
+extern int (*chess_apply_moves[])(ChessMatch*, ChessPiece*, ChessMove*);
 
 DirectionType chess_get_directions(ChessSquare from, ChessSquare to);
 
@@ -209,7 +210,7 @@ int chess_ignore_squares(ChessMatch *play,
                          ChessSquare toSquare,
                          CheckType check);
 
-extern int (*chess_pieces_ranges[])(ChessMatch*, ChessSquare, ChessSquare, CheckType);
+extern int (*chess_pieces_jumps[])(ChessMatch*, ChessSquare, ChessSquare, CheckType);
 
 ChessMoveList* chess_piece_possible_moves(ChessMatch *play,
                                           ChessPiece *piece);
@@ -229,11 +230,16 @@ int chess_undo_capture_move(ChessMatch*, ChessPiece*, ChessMove);
 int chess_undo_castling_move(ChessMatch*, ChessPiece*, ChessMove);
 int chess_undo_en_passant_move(ChessMatch*, ChessPiece*, ChessMove);
 int chess_undo_promotion_move(ChessMatch*, ChessPiece*, ChessMove);
+int chess_undo_promotion_capture_move(ChessMatch*, ChessPiece*, ChessMove);
 
 extern int (*chess_undo_moves[])(ChessMatch*, ChessPiece*, ChessMove);
 
 ChessMoveList* chess_every_possible_move(ChessMatch *play);
 
 int chess_is_checkmate(ChessMatch *play);
+
+void chess_promote_to(ChessMove *move, PiecesType promotionType);
+
+void chess_choose_and_apply_random(ChessMatch *play);
 
 #endif

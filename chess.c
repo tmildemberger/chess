@@ -12,27 +12,6 @@
 
 #if CLI == 1
 
-
-#else
-const float     width   =   640;
-const float     height  =   640;
-
-const float     FPS     =   60;
-
-const char *image_paths[] = {"art/pawn.png", "art/rook.png", "art/knight.png",
-                "art/bishop.png", "art/queen.png", "art/king.png",
-                "art/pawn_b.png", "art/rook_b.png", "art/knight_b.png",
-                "art/bishop_b.png", "art/queen_b.png", "art/king_b.png"};
-const unsigned int image_paths_sz = sizeof (image_paths) / sizeof (char*);
-
-const int PIECE_WHITE_R = 28;
-const int PIECE_WHITE_G = 72;
-const int PIECE_WHITE_B = 100;
-const int PIECE_BLACK_R = 85;
-const int PIECE_BLACK_G = 54;
-const int PIECE_BLACK_B = 2;
-#endif
-
 void my_flush(void){
     while (getchar() != '\n');
 }
@@ -56,7 +35,7 @@ ChessMove mkMove(ChessMatch *match, char *str){
     char fromRow = 0;
     char toCol = 0;
     char toRow = 0;
-    char targetType = 0;
+    char promotionType = 0;
     PiecesType pType;
     int idx = 0;
     getAtoH(str, &idx, &fromCol);
@@ -67,14 +46,13 @@ ChessMove mkMove(ChessMatch *match, char *str){
     ChessSquare from = { fromCol - 'a', fromRow - '1' };
     ChessSquare to = { toCol - 'a', toRow - '1' };
     ChessPiece *piece = chess_piece_in_pos(match, from);
-    ChessPiece *target = chess_piece_in_pos(match, to);
-    targetType = str[idx];printf("%c\n", targetType != '\n'?targetType:' ');
-    if (targetType == '\n'){
-        if (target != NULL) pType = target->type;
-        else if (piece != NULL) pType = piece->type;
-        else pType = PAWN;
+    // ChessPiece *target = chess_piece_in_pos(match, to);
+    promotionType = str[idx];
+    printf("%c\n", promotionType != '\n' ? promotionType : ' ');
+    if (promotionType == '\n'){
+        pType = QUEEN;
     } else {
-        switch (targetType){
+        switch (promotionType){
             case 'p':
                 pType = PAWN;
                 break;
@@ -94,12 +72,13 @@ ChessMove mkMove(ChessMatch *match, char *str){
                 pType = KING;
                 break;
             default:
-                if (target != NULL) pType = target->type;
-                else if (piece != NULL) pType = piece->type;
-                else pType = PAWN;
+                pType = QUEEN;
+                break;
         }
     }
-    return chess_create_move(match, piece, to, pType);
+    ChessMove move = chess_create_move(match, piece, to);
+    chess_promote_to(&move, pType);
+    return move;
 }
 
 int readMove(ChessMatch *match, ChessMove *mv){
@@ -148,8 +127,6 @@ void print_all(ChessMatch *match){
                     case KING:
                         fputc( (pice->team) == WHITE ? 'K' : 'k', stdout);
                         break;
-                    case NOTHING:
-                        break;
                 }
             } else {
                 if(black){
@@ -168,6 +145,26 @@ void print_all(ChessMatch *match){
     printf("   ---------------------------------\n");
     printf("     a   b   c   d   e   f   g   h \n");
 }
+
+#else
+const float     width   =   640;
+const float     height  =   640;
+
+const float     FPS     =   60;
+
+const char *image_paths[] = {"art/pawn.png", "art/rook.png", "art/knight.png",
+                "art/bishop.png", "art/queen.png", "art/king.png",
+                "art/pawn_b.png", "art/rook_b.png", "art/knight_b.png",
+                "art/bishop_b.png", "art/queen_b.png", "art/king_b.png"};
+const unsigned int image_paths_sz = sizeof (image_paths) / sizeof (char*);
+
+const int PIECE_WHITE_R = 28;
+const int PIECE_WHITE_G = 72;
+const int PIECE_WHITE_B = 100;
+const int PIECE_BLACK_R = 85;
+const int PIECE_BLACK_G = 54;
+const int PIECE_BLACK_B = 2;
+#endif
 
 int main(){//int argc, char *argv[]){
     
@@ -188,8 +185,10 @@ int main(){//int argc, char *argv[]){
                 my_flush();
             }
             if (in == 'y') {
-                chess_apply_move(match, move);
+                chess_apply_move(match, &move);
                 if (chess_is_checkmate(match)) break;
+                chess_choose_and_apply_random(match);
+                if (chess_is_checkmate(match)) break;                
             }
         } else if (status == 0) {
             printf("esse movimento nao e legal, tente outro\n");
@@ -368,7 +367,7 @@ int main(){//int argc, char *argv[]){
 
     int go_away = 0;
     int redraw = 0;
-    int draw_pieces = 0;
+    int draw_pieces = 1;
     ChessVisualPiece *dragging = NULL;
     int x_diff = 0;
     int y_diff = 0;
@@ -429,20 +428,22 @@ int main(){//int argc, char *argv[]){
                 (event.mouse.x - (disp_data.width-640)/2 ) / 80,
                 match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)};
 
-                ChessPiece *piece = dragging->piece;
-                ChessPiece *target = chess_piece_in_pos(match, toSquare);
-                PiecesType pType = PAWN;
-                if (target != NULL) pType = target->type;
-                else if (piece != NULL) pType = piece->type;
+                // ChessPiece *piece = dragging->piece;
+                // ChessPiece *target = chess_piece_in_pos(match, toSquare);
 
                 ChessMove move = chess_create_move(match,
                                                    dragging->piece,
-                                                   toSquare,
-                                                   pType);
-                chess_apply_move(match, move);
+                                                   toSquare);
+                chess_apply_move(match, &move);
                 if (chess_is_checkmate(match)){
                     go_away = 1;                    
                 }
+                // if (match->board.turn == 1){
+                //     chess_choose_and_apply_random(match);
+                //     if (chess_is_checkmate(match)){
+                //         go_away = 1;                    
+                //     }    
+                // }
 
                 dragging->x = dragging->piece->pos.col*80+(disp_data.width-640)/2;
                 dragging->y = (match->board.board_height-1-dragging->piece->pos.row)*80+(disp_data.height-640)/2;

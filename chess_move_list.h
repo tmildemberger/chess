@@ -15,6 +15,8 @@ void chess_append_move_section(ChessMoveList *list, ChessMoveList *section);
 
 int chess_count_moves(ChessMoveList *list);
 
+ChessMove chess_move_index(ChessMoveList *list, unsigned int idx);
+
 ChessMove chess_last_move(ChessMoveList *list);
 
 void chess_remove_last_move(ChessMoveList *list);
