@@ -68,8 +68,8 @@ if platform.machine().endswith("64"):
         os = "linux"
         mk.write("os = linux\n")
         mk.write("obj_ext = .o\n")
-        mk.write("ALLEG_LIB = `pkg-config --libs allegro-5 allegro_image-5 allegro_primitives-5`\n")
-        mk.write("ALLEG_INC = `pkg-config --cflags allegro-5 allegro_image-5 allegro_primitives-5`\n")
+        mk.write("ALLEG_LIB = `pkg-config --libs allegro-5 allegro_image-5 allegro_primitives-5 allegro_font-5 allegro_ttf-5`\n")
+        mk.write("ALLEG_INC = `pkg-config --cflags allegro-5 allegro_image-5 allegro_primitives-5 allegro_font-5 allegro_ttf-5`\n")
         print('64 bit linux system detected')
 
     elif platform.system() == "Windows":

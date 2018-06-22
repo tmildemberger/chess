@@ -1,5 +1,6 @@
 #include "chess_error.h"
 #include <stdio.h>
+//nem um pouco terminado até agora
 
 const char *err_msg_pt[] = {
                     "portuguese",
@@ -15,7 +16,8 @@ const char *err_msg_pt[] = {
                     "erro 10",
                     "erro 11",
                     "erro 12",
-                    "erro 13"
+                    "erro 13",
+                    "erro 14"
                     };
 
 const char *err_msg_en[] = {
@@ -32,7 +34,8 @@ const char *err_msg_en[] = {
                     "error 10",
                     "error 11",
                     "error 12",
-                    "error 13"
+                    "error 13",
+                    "error 14"
                     };
 
 const char **err_msg[] = {

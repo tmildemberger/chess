@@ -50,52 +50,52 @@ int chess_count_moves(ChessMoveList *list){
 }
 
 ChessMove chess_move_index(ChessMoveList *list, unsigned int idx){
-    static unsigned int last_idx = 0;
-    static ChessMoveList *last_list = NULL;
-    static ChessMoveList *last_section = NULL;
-    static unsigned int last_section_idx = 0;
-    static ChessMove last_move = {{0,0},{0,0},0,0,0};
+    // static unsigned int last_idx = 0;
+    // static ChessMoveList *last_list = NULL;
+    // static ChessMoveList *last_section = NULL;
+    // static unsigned int last_section_idx = 0;
+    // static ChessMove last_move = {{0,0},{0,0},0,0,0};
     ChessMove emptyMove = {{0,0},{0,0},0,0,0};
-    // if (idx < 0) return NULL;
+    // // if (idx < 0) return NULL;
 
-    if (list == last_list){
-        if (idx == last_idx){
-            return last_move;
-        } else if (idx - last_idx < last_section->used_size - last_section_idx){
-            last_section_idx = last_section_idx + idx - last_idx;
-            last_idx = idx;
-            last_move = last_section->moves[last_section_idx];
-            return last_move;
-        } else if (last_idx - idx <= last_section_idx){
-            last_section_idx = last_section_idx - last_idx + idx;
-            last_idx = idx;
-            last_move = last_section->moves[last_section_idx];
-            return last_move;
-        } else if (idx < list->used_size){
-            last_section =  list;
-            last_section_idx = idx;
-            last_idx = idx;
-            last_move = last_section->moves[last_section_idx];
-            return last_move;
-        } else if (idx > last_idx){
-            ChessMoveList *curr_section = last_section;
-            unsigned int curr_idx = idx - last_idx + last_section_idx;
-            while (curr_idx >= curr_section->used_size){
-                if (curr_section->nxt == NULL){
-                    return emptyMove;
-                }
-                curr_idx -= curr_section->used_size;
-                curr_section = curr_section->nxt;
-            }
-            last_section = curr_section;
-            last_section_idx = curr_idx;
-            last_idx = idx;
-            last_move = last_section->moves[last_section_idx];
-            return last_move;
-        } else if (idx < last_idx){
-            return emptyMove;
-        }
-    } else {
+    // if (list == last_list){
+    //     if (idx == last_idx){
+    //         return last_move;
+    //     } else if (idx - last_idx < last_section->used_size - last_section_idx){
+    //         last_section_idx = last_section_idx + idx - last_idx;
+    //         last_idx = idx;
+    //         last_move = last_section->moves[last_section_idx];
+    //         return last_move;
+    //     } else if (last_idx - idx <= last_section_idx){
+    //         last_section_idx = last_section_idx - last_idx + idx;
+    //         last_idx = idx;
+    //         last_move = last_section->moves[last_section_idx];
+    //         return last_move;
+    //     } else if (idx < list->used_size){
+    //         last_section =  list;
+    //         last_section_idx = idx;
+    //         last_idx = idx;
+    //         last_move = last_section->moves[last_section_idx];
+    //         return last_move;
+    //     } else if (idx > last_idx){
+    //         ChessMoveList *curr_section = last_section;
+    //         unsigned int curr_idx = idx - last_idx + last_section_idx;
+    //         while (curr_idx >= curr_section->used_size){
+    //             if (curr_section->nxt == NULL){
+    //                 return emptyMove;
+    //             }
+    //             curr_idx -= curr_section->used_size;
+    //             curr_section = curr_section->nxt;
+    //         }
+    //         last_section = curr_section;
+    //         last_section_idx = curr_idx;
+    //         last_idx = idx;
+    //         last_move = last_section->moves[last_section_idx];
+    //         return last_move;
+    //     } else if (idx < last_idx){
+    //         return emptyMove;
+    //     }
+    // } else {
         ChessMoveList *curr_section = list;
         unsigned int curr_idx = idx;
         while (curr_idx >= curr_section->used_size){
@@ -105,14 +105,15 @@ ChessMove chess_move_index(ChessMoveList *list, unsigned int idx){
             curr_idx -= curr_section->used_size;
             curr_section = curr_section->nxt;
         }
-        last_list = list;
-        last_section = curr_section;
-        last_section_idx = curr_idx;
-        last_idx = idx;
-        last_move = last_section->moves[last_section_idx];
-        return last_move;
-    }
-    return emptyMove;
+    //     last_list = list;
+    //     last_section = curr_section;
+    //     last_section_idx = curr_idx;
+    //     last_idx = idx;
+    //     last_move = last_section->moves[last_section_idx];
+    //     return last_move;
+    // }
+    // return emptyMove;
+    return curr_section->moves[curr_idx];
 }
 
 ChessMove chess_last_move(ChessMoveList *list){

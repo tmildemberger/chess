@@ -29,6 +29,7 @@ typedef enum check_type {
 
 #define WHITE 0
 #define BLACK 1
+#define DRAW 2
 
 #define TABLE_WIDTH 8
 #define TABLE_HEIGHT 8
@@ -237,6 +238,12 @@ extern int (*chess_undo_moves[])(ChessMatch*, ChessPiece*, ChessMove);
 ChessMoveList* chess_every_possible_move(ChessMatch *play);
 
 int chess_is_checkmate(ChessMatch *play);
+
+int chess_is_draw(ChessMatch *play);
+
+int chess_game_end(ChessMatch *play);
+
+int chess_game_winner(ChessMatch *play);
 
 void chess_promote_to(ChessMove *move, PiecesType promotionType);
 
