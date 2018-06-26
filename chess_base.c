@@ -259,6 +259,7 @@ MoveType chess_promotion_move(ChessMatch *play,
     int dx = move.to.col - piece->pos.col;
     int dy = move.to.row - piece->pos.row;
     if (move.to.row == lastRow && 
+        !chess_piece_in_pos(play, move.to) &&
         chess_pawn_ok_normal(piece, dx, dy))
         return PROMOTION_NORMAL_MOVE;
     else 
@@ -466,7 +467,7 @@ int chess_apply_castling_move(ChessMatch *play,
                              0;
     chess_put_piece_in(
         chess_piece_in_pos(play, (ChessSquare){ lastCol, move->to.row }),
-        (ChessSquare){ lastCol ? move->to.col-1 : move->to.row+1, move->to.row });
+        (ChessSquare){ (lastCol ? move->to.col-1 : move->to.col+1), move->to.row });
     chess_put_piece_in(piece, move->to);
     return 1;
 }
@@ -734,7 +735,7 @@ int chess_undo_castling_move(ChessMatch *play,
                              0;
     chess_unput_piece_in(
         chess_piece_in_pos(play, 
-        (ChessSquare){ lastCol ? move.to.col-1 : move.to.row+1, move.to.row }),
+        (ChessSquare){ (lastCol ? move.to.col-1 : move.to.col+1), move.to.row }),
         (ChessSquare){ lastCol, move.to.row });
     chess_unput_piece_in(piece, move.from);
     return 1;
@@ -787,12 +788,14 @@ int chess_can_be_reached(ChessMatch *play, ChessPiece *piece, ChessSquare to){
 
 void chess_undo_last_move(ChessMatch *play){
     ChessMove move = chess_last_move(play->record);
-    chess_remove_last_move(play->record);
-    ChessPiece *piece = chess_piece_in_pos(play, move.to);
-    chess_undo_moves[move.type](play, piece, move);
-    play->board.movements--;
-    play->board.turn++;
-    play->board.turn %= 2;
+    if (move.type != INVALID_MOVE){
+        chess_remove_last_move(play->record);
+        ChessPiece *piece = chess_piece_in_pos(play, move.to);
+        chess_undo_moves[move.type](play, piece, move);
+        play->board.movements--;
+        play->board.turn++;
+        play->board.turn %= 2;
+    }
 }
 
 int chess_in_check(ChessMatch *play, unsigned char team){

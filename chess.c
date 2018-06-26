@@ -165,6 +165,13 @@ const int PIECE_WHITE_B = 100;
 const int PIECE_BLACK_R = 85;
 const int PIECE_BLACK_G = 54;
 const int PIECE_BLACK_B = 2;
+
+typedef enum buttons_nums {
+    LEFT_MOUSE_BUTTON = 1,
+    RIGHT_MOUSE_BUTTON,
+    MIDDLE_MOUSE_BUTTON
+} ButtonsNums;
+
 #endif
 
 int main(){//int argc, char *argv[]){
@@ -408,6 +415,7 @@ int main(){//int argc, char *argv[]){
     int draw_pieces = 1;
     int activate_ai = 0;
     int winner = -1;
+    // int buttons[2] = { 9, 9 };
     ChessVisualPiece *dragging = NULL;
     int x_diff = 0;
     int y_diff = 0;
@@ -438,6 +446,22 @@ int main(){//int argc, char *argv[]){
                 case ALLEGRO_KEY_ESCAPE:
                     go_away = 1;
                     break;
+                case ALLEGRO_KEY_Z:
+                    winner = -1;
+                    chess_undo_last_move(match);
+                    if (activate_ai && match->board.turn == 1){
+                        chess_undo_last_move(match);
+                    }
+                    ChessVisualPiece *vpiece = NULL;
+                    i = 0;
+                    for (vpiece = chess_v_piece_index(visual_head, i);
+                         vpiece != NULL;
+                         vpiece = chess_v_piece_index(visual_head, ++i)){
+
+                        vpiece->x = vpiece->piece->pos.col*80+(disp_data.width-640)/2;
+                        vpiece->y = (match->board.board_height-1-vpiece->piece->pos.row)*80+(disp_data.height-640)/2;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -447,26 +471,27 @@ int main(){//int argc, char *argv[]){
                 dragging->y = event.mouse.y + y_diff;
             }
         } else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN){
-            unsigned char r, g, b;
-            if (event.mouse.x >= (disp_data.width-640)/2 && event.mouse.x <= (disp_data.width-640)/2+640
-             && event.mouse.y >= (disp_data.height-640)/2 && event.mouse.y <= (disp_data.height-640)/2+640){
-                al_unmap_rgb(al_get_pixel(real_board, 
-                                    (event.mouse.x), 
-                                    (event.mouse.y)), &r, &g, &b);
+            if (winner < 0 && event.mouse.button == LEFT_MOUSE_BUTTON){
+                unsigned char r, g, b;
+                if (event.mouse.x >= (disp_data.width-640)/2 && event.mouse.x <= (disp_data.width-640)/2+640
+                && event.mouse.y >= (disp_data.height-640)/2 && event.mouse.y <= (disp_data.height-640)/2+640){
+                    al_unmap_rgb(al_get_pixel(real_board, 
+                                        (event.mouse.x), 
+                                        (event.mouse.y)), &r, &g, &b);
 
-                if ((r == PIECE_BLACK_R && g == PIECE_BLACK_G && b == PIECE_BLACK_B)
-                || (r == PIECE_WHITE_R && g == PIECE_WHITE_G && b == PIECE_WHITE_B)){
-                    dragging = chess_find_vpiece_with_piece(visual_head,
-                        chess_piece_in_pos(match,
-                        (ChessSquare){ ( event.mouse.x - (disp_data.width-640)/2 ) / 80, 
-                        match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)}));
-                    x_diff = dragging->x - event.mouse.x;
-                    y_diff = dragging->y - event.mouse.y;
+                    if ((r == PIECE_BLACK_R && g == PIECE_BLACK_G && b == PIECE_BLACK_B)
+                    || (r == PIECE_WHITE_R && g == PIECE_WHITE_G && b == PIECE_WHITE_B)){
+                        dragging = chess_find_vpiece_with_piece(visual_head,
+                            chess_piece_in_pos(match,
+                            (ChessSquare){ ( event.mouse.x - (disp_data.width-640)/2 ) / 80, 
+                            match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)}));
+                        x_diff = dragging->x - event.mouse.x;
+                        y_diff = dragging->y - event.mouse.y;
+                    }
                 }
-             }
-
+            }
         } else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP){
-            if (dragging && winner < 0){
+            if (dragging && event.mouse.button == LEFT_MOUSE_BUTTON){
                 ChessSquare toSquare = {
                 (event.mouse.x - (disp_data.width-640)/2 ) / 80,
                 match->board.board_height-1-((event.mouse.y - (disp_data.height-640)/2 ) / 80)};
@@ -478,15 +503,26 @@ int main(){//int argc, char *argv[]){
                                                    dragging->piece,
                                                    toSquare);
                 chess_apply_move(match, &move);
-                if (chess_game_end(match)){
-                    winner = chess_game_winner(match);                    
+                if (move.type != INVALID_MOVE){
+                    // printf("\nmymove:\nfrom %d %d\nto %d %d\nmovetype %d\ntgtTp %d\nprmTp %d\n",
+                    // move.from.col, move.from.row, move.to.col, move.to.row, move.type,
+                    // move.targetType, move.promotionType);
+                    if (chess_game_end(match)){
+                        winner = chess_game_winner(match);
+                    }
+                    // if (chess_in_check(match, match->board.turn)) printf("check\n");
                 }
 
                 if (activate_ai && match->board.turn == 1){
                     chess_choose_and_apply_random(match);
+                    move = chess_last_move(match->record);
+                    // printf("\ntheirmove:\nfrom %d %d\nto %d %d\nmovetype %d\ntgtTp %d\nprmTp %d\n",
+                    // move.from.col, move.from.row, move.to.col, move.to.row, move.type,
+                    // move.targetType, move.promotionType);
                     if (chess_game_end(match)){
                         winner = chess_game_winner(match);                                           
-                    }    
+                    }
+                    // if (chess_in_check(match, match->board.turn)) printf("check\n");
                 }
 
                 dragging->x = dragging->piece->pos.col*80+(disp_data.width-640)/2;
