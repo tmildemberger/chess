@@ -9,7 +9,7 @@
 #include "chess_piece_list.h"
 #include "chess_vpiece_list.h"
 
-#define CLI 1
+#define CLI 0
 
 #if CLI == 1
 
@@ -574,7 +574,7 @@ int main(){//int argc, char *argv[]){
 
             al_draw_bitmap(real_board, 0, 0, 0);
 
-            char *msg;
+            char *msg = NULL;
             ALLEGRO_COLOR color;
             if (winner < 0){
                 if (match->board.turn == 0){

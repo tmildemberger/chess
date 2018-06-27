@@ -44,7 +44,7 @@ typedef enum move_type {
     PROMOTION_CAPTURE_MOVE
 } MoveType;
 
-#define DEPTH 2
+#define DEPTH 1
 
 #define MAX_PLAYER 0
 #define MIN_PLAYER 1
