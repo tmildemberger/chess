@@ -41,13 +41,13 @@ const char **err_msg[] = {
                     };
 
 void chess_error(int error_num){
-    // switch (error_num){
-    //     case ALLOC_ERROR:
-    //         fputs(err_msg[CURR_LANG][ALLOC_ERROR], stderr);
-    //         break;
-    //     default:
-    //         fprintf(stderr, "error finding error\n");
-    //         break;
-    // }
+    /*switch (error_num){
+        case ALLOC_ERROR:
+            fputs(err_msg[CURR_LANG][ALLOC_ERROR], stderr);
+            break;
+        default:
+            fprintf(stderr, "error finding error\n");
+            break;
+    }*/
     fputs(err_msg[CURR_LANG][error_num], stderr);
 }

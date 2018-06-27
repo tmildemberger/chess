@@ -7,3 +7,4 @@ makefile
 *.log
 codeblocks/
 .vscode/
+.gdb_history
