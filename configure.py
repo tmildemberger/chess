@@ -5,7 +5,7 @@ import locale
 
 debug = True
 optimizate = False
-test = False
+profile = False
 
 args = sys.argv[1:]
 # if len(args) == 0:
@@ -21,8 +21,8 @@ options_v = ["", "", ""]
 ##inc_path = ""
 
 for arg in args:
-    if arg == "--test-ok":
-        test = True
+    if arg == "--profile-ok":
+        profile = True
     elif arg == "--debug-ok":
         debug = True
         optimizate = False
@@ -35,7 +35,7 @@ for arg in args:
         print(
 """\
 options:
-  --test-ok: enable testing, disabled by default
+  --profile-ok: enable profiling, disabled by default
   --debug-ok: enable debugging, enabled by default
   --nodebug-ok: disable debugging
   --release-ok: no debug and enable optimizations, disabled by default
@@ -61,6 +61,9 @@ if optimizate:
     options += "OPTIMIZATE"
 if options != "":
     mk.write("options = " + options + "\n")
+
+if profile:
+    mk.write("profiling = yes\n")
 
 os = ""
 if platform.machine().endswith("64"):

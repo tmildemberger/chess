@@ -44,6 +44,11 @@ typedef enum move_type {
     PROMOTION_CAPTURE_MOVE
 } MoveType;
 
+#define DEPTH 2
+
+#define MAX_PLAYER 0
+#define MIN_PLAYER 1
+
 #include "chess_error.h"
 #include <stdlib.h>
 #include <stdint.h>
@@ -248,5 +253,13 @@ int chess_game_winner(ChessMatch *play);
 void chess_promote_to(ChessMove *move, PiecesType promotionType);
 
 void chess_choose_and_apply_random(ChessMatch *play);
+
+ChessMove chess_get_ai_move(ChessMatch *play);
+
+int chess_minimax_move(ChessMatch *play,
+                       int depth,
+                       int player);
+
+int chess_curr_board_val(ChessMatch *play);
 
 #endif

@@ -909,3 +909,99 @@ void chess_choose_and_apply_random(ChessMatch *play){
     }
     chess_destroy_move_list(possible_moves);
 }
+
+ChessMove chess_get_ai_move(ChessMatch *play){
+    ChessMoveList *possible_moves = chess_every_possible_move(play);
+    int tam = chess_count_moves(possible_moves);
+
+    ChessMove bestMove = {0};
+    int bestMoveValue = -9999;
+    int value;
+    int i;
+    for (i = 0; i < tam; i++){
+        ChessMove move = chess_move_index(possible_moves, i);
+        chess_apply_move(play, &move);
+        value = chess_minimax_move(play, DEPTH, MAX_PLAYER);
+        chess_undo_last_move(play);
+        if (value > bestMoveValue){
+            bestMove = move;
+            bestMoveValue = value;
+        }
+    }
+    chess_destroy_move_list(possible_moves);
+    return bestMove;
+}
+
+int chess_minimax_move(ChessMatch *play,
+                       int depth,
+                       int player){
+    ChessMoveList *possible_moves = chess_every_possible_move(play);
+    int tam = chess_count_moves(possible_moves);
+    int bestMoveValue = 0;
+    int value;
+    int i;
+    if (depth <= 0 || tam == 0){
+        chess_destroy_move_list(possible_moves);
+        return chess_curr_board_val(play);
+    }
+
+    if (player == MAX_PLAYER){
+        int bestMoveValue = -9999;
+        for (i = 0; i < tam; i++){
+            ChessMove move = chess_move_index(possible_moves, i);
+            chess_apply_move(play, &move);
+            
+            value = chess_minimax_move(play, depth - 1, MIN_PLAYER);
+            if (value > bestMoveValue){
+                bestMoveValue = value;
+            }
+
+            chess_undo_last_move(play);
+        }
+    } else {
+        int bestMoveValue = 9999;
+        for (i = 0; i < tam; i++){
+            ChessMove move = chess_move_index(possible_moves, i);
+            chess_apply_move(play, &move);
+
+            value = chess_minimax_move(play, depth - 1, MAX_PLAYER);
+            if (value < bestMoveValue){
+                bestMoveValue = value;
+            }
+
+            chess_undo_last_move(play);
+        }
+    }
+    chess_destroy_move_list(possible_moves);
+    return bestMoveValue;
+}
+
+int chess_curr_board_val(ChessMatch *play){
+    if (chess_game_end(play)){
+        switch (chess_game_winner(play)){
+            case WHITE:
+                return -500;
+            case BLACK:
+                return 500;
+            case DRAW:
+                return 0;
+        }
+    }
+
+    int piecesValues[] = { 10, 50, 30, 35, 90, 500 };
+    ChessPiece *piece;
+    int i = 0;
+    int totalValue = 0;
+    for (piece = chess_piece_index(play->board.pieces, i);
+         piece != NULL;
+         piece = chess_piece_index(play->board.pieces, ++i)){
+        
+        if (piece->alive == 0) continue;
+        if (piece->team == WHITE){
+            totalValue -= piecesValues[piece->type];
+        } else {
+            totalValue += piecesValues[piece->type];
+        }
+    }
+    return totalValue;
+}

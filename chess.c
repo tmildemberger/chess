@@ -9,7 +9,7 @@
 #include "chess_piece_list.h"
 #include "chess_vpiece_list.h"
 
-#define CLI 0
+#define CLI 1
 
 #if CLI == 1
 
@@ -208,7 +208,9 @@ int main(){//int argc, char *argv[]){
                 if (chess_game_end(match)) break;
 
                 if (activate_ai){
-                    chess_choose_and_apply_random(match);
+                    // chess_choose_and_apply_random(match);
+                    move = chess_get_ai_move(match);
+                    chess_apply_move(match, &move);
                     if (chess_game_end(match)) break;                
                 }
             }
@@ -514,8 +516,11 @@ int main(){//int argc, char *argv[]){
                 }
 
                 if (activate_ai && match->board.turn == 1){
-                    chess_choose_and_apply_random(match);
-                    move = chess_last_move(match->record);
+                    // chess_choose_and_apply_random(match);
+                    // move = chess_last_move(match->record);
+                    move = chess_get_ai_move(match);
+                    chess_apply_move(match, &move);
+
                     // printf("\ntheirmove:\nfrom %d %d\nto %d %d\nmovetype %d\ntgtTp %d\nprmTp %d\n",
                     // move.from.col, move.from.row, move.to.col, move.to.row, move.type,
                     // move.targetType, move.promotionType);
@@ -589,7 +594,7 @@ int main(){//int argc, char *argv[]){
                 if (winner == WHITE){
                     msg = "PLAYER 1 VENCEU";
                     if (activate_ai){
-                        msg = "VC VENCEU";
+                        msg = "VOCÊ VENCEU";
                     }
                     color = al_map_rgb(PIECE_WHITE_R, PIECE_WHITE_G, PIECE_WHITE_B);
                 } else if (winner == BLACK){

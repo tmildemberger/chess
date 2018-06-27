@@ -8,6 +8,7 @@
 
 DEBUG_OPT = -g
 OPTIMIZATE_OPT = -O2
+PROFILE_OPT = -pg
 src = $(wildcard *.c)
 obj = $(src:.c=$(obj_ext))
 dep = $(obj:$(obj_ext)=.dep)
@@ -21,10 +22,14 @@ endif
 ifeq ($(options),OPTIMIZATE)
 	CFLAGS += $(OPTIMIZATE_OPT)
 endif
+ifeq ($(profiling),yes)
+	CFLAGS += $(PROFILE_OPT)
+	LDFLAGS += $(PROFILE_OPT)
+endif
 CFLAGS += -Wall -Wextra -std=c99 -pedantic 
 CFLAGS += -Werror -Wno-unused-parameter #-Wno-unused-variable
 CFLAGS += $(ALLEG_INC)
-LDFLAGS = $(ALLEG_LIB)
+LDFLAGS += $(ALLEG_LIB)
 EXEC = $(proj)$(exe_ext)
 TEMPS = $(dep)
 
@@ -54,6 +59,9 @@ endif
 .PHONY: greetings
 greetings: 
 	@echo Compiling project $(proj) for $(os)
+ifeq ($(profiling),yes)
+	@echo Profiling enabled
+endif
 
 .PHONY: ok
 ok:
