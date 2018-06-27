@@ -1,17 +1,25 @@
 #ifndef CHESS_ERROR_H
 #define CHESS_ERROR_H
 
-#define AL_INIT_ERROR 1
-#define AL_IMAGE_INIT_ERROR 2
-#define AL_PRIMITIVES_INIT_ERROR 3
-#define AL_INSTALL_MOUSE_ERROR 4
-#define AL_INSTALL_KEYBOARD_ERROR 5
-#define AL_CREATE_TIMER_ERROR 6
-#define AL_CREATE_DISPLAY_ERROR 7
-#define AL_IMG_LOAD_ERROR 8
-#define AL_CREATE_BITMAP_ERROR 9
-#define AL_CREATE_EVENT_QU_ERROR 10
-#define ALLOC_ERROR 11
+// talvez algum dia haja uma diferença entre erros fatais e 
+// outros erros menos fatais
+
+typedef enum error_types{
+    AL_INIT_ERROR = 1,
+    AL_IMAGE_INIT_ERROR,
+    AL_PRIMITIVES_INIT_ERROR,
+    AL_FONT_INIT_ERROR,
+    AL_TTF_INIT_ERROR,
+    AL_INSTALL_MOUSE_ERROR,
+    AL_INSTALL_KEYBOARD_ERROR,
+    AL_LOAD_FONT_ERROR,
+    AL_CREATE_TIMER_ERROR,
+    AL_CREATE_DISPLAY_ERROR,
+    AL_IMG_LOAD_ERROR,
+    AL_CREATE_BITMAP_ERROR,
+    AL_CREATE_EVENT_QU_ERROR,
+    ALLOC_ERROR
+} ChessErrors;
 
 #define PORTUGUESE 0
 #define ENGLISH 1

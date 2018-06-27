@@ -2,8 +2,8 @@
 #include "chess_piece_list.h"
 #include "chess_move_list.h"
 
-#include <time.h>
-#include <stdlib.h>
+#include <time.h>       //time
+#include <stdlib.h>     //srand, rand e abs
 
 MoveType (*chess_special_moves[])(ChessMatch*, ChessPiece*, ChessMove) = {
     chess_pawn_specials,
@@ -210,6 +210,8 @@ MoveType chess_en_passant(ChessMatch *play,
     ChessMove lastMove = chess_last_move(play->record);
     ChessPiece *otherPawn = chess_piece_in_pos(play, lastMove.to);
 
+    int dx = move.to.col - piece->pos.col;
+    int dy = move.to.row - piece->pos.row;
     if (//move.targetType == PAWN &&
         otherPawn != NULL &&
         otherPawn->type == PAWN &&
@@ -217,7 +219,8 @@ MoveType chess_en_passant(ChessMatch *play,
         (lastMove.to.row - lastMove.from.row == -2 ||
         lastMove.to.row - lastMove.from.row == 2) &&
         chess_same_square(otherPawn->pos, 
-                          (ChessSquare){ move.to.col, piece->pos.row }))
+                          (ChessSquare){ move.to.col, piece->pos.row }) &&
+        chess_pawn_ok_capture(piece, dx, dy)) //movimento é igual
         return EN_PASSANT_MOVE;
     else 
         return INVALID_MOVE;
@@ -256,6 +259,7 @@ MoveType chess_promotion_move(ChessMatch *play,
     int dx = move.to.col - piece->pos.col;
     int dy = move.to.row - piece->pos.row;
     if (move.to.row == lastRow && 
+        !chess_piece_in_pos(play, move.to) &&
         chess_pawn_ok_normal(piece, dx, dy))
         return PROMOTION_NORMAL_MOVE;
     else 
@@ -271,6 +275,7 @@ MoveType chess_promotion_capture_move(ChessMatch *play,
     int dx = move.to.col - piece->pos.col;
     int dy = move.to.row - piece->pos.row;
     if (move.to.row == lastRow && 
+        chess_piece_in_pos(play, move.to) &&
         chess_pawn_ok_capture(piece, dx, dy))
         return PROMOTION_CAPTURE_MOVE;
     else 
@@ -410,8 +415,9 @@ int chess_rook_ok_move(ChessPiece *piece, int dx, int dy){
 }
 
 int chess_knight_ok_move(ChessPiece *piece, int dx, int dy){
-    dx = dx>0 ? dx : -dx;
-    dy = dy>0 ? dy : -dy;
+    /// trocado por abs()
+    dx = abs(dx); //dx = dx>0 ? dx : -dx;
+    dy = abs(dy); //dy = dy>0 ? dy : -dy;
     return dx + dy == 3 && dx * dy == 2;
 }
 
@@ -425,8 +431,8 @@ int chess_queen_ok_move(ChessPiece *piece, int dx, int dy){
 }
 
 int chess_king_ok_move(ChessPiece *piece, int dx, int dy){
-    dx = dx>0 ? dx : -dx;
-    dy = dy>0 ? dy : -dy;
+    dx = abs(dx); //dx = dx>0 ? dx : -dx;
+    dy = abs(dy); //dy = dy>0 ? dy : -dy;
     return dx <= 1 && dy <= 1;
 }
 
@@ -461,7 +467,7 @@ int chess_apply_castling_move(ChessMatch *play,
                              0;
     chess_put_piece_in(
         chess_piece_in_pos(play, (ChessSquare){ lastCol, move->to.row }),
-        (ChessSquare){ lastCol ? move->to.col-1 : move->to.row+1, move->to.row });
+        (ChessSquare){ (lastCol ? move->to.col-1 : move->to.col+1), move->to.row });
     chess_put_piece_in(piece, move->to);
     return 1;
 }
@@ -729,7 +735,7 @@ int chess_undo_castling_move(ChessMatch *play,
                              0;
     chess_unput_piece_in(
         chess_piece_in_pos(play, 
-        (ChessSquare){ lastCol ? move.to.col-1 : move.to.row+1, move.to.row }),
+        (ChessSquare){ (lastCol ? move.to.col-1 : move.to.col+1), move.to.row }),
         (ChessSquare){ lastCol, move.to.row });
     chess_unput_piece_in(piece, move.from);
     return 1;
@@ -782,12 +788,14 @@ int chess_can_be_reached(ChessMatch *play, ChessPiece *piece, ChessSquare to){
 
 void chess_undo_last_move(ChessMatch *play){
     ChessMove move = chess_last_move(play->record);
-    chess_remove_last_move(play->record);
-    ChessPiece *piece = chess_piece_in_pos(play, move.to);
-    chess_undo_moves[move.type](play, piece, move);
-    play->board.movements--;
-    play->board.turn++;
-    play->board.turn %= 2;
+    if (move.type != INVALID_MOVE){
+        chess_remove_last_move(play->record);
+        ChessPiece *piece = chess_piece_in_pos(play, move.to);
+        chess_undo_moves[move.type](play, piece, move);
+        play->board.movements--;
+        play->board.turn++;
+        play->board.turn %= 2;
+    }
 }
 
 int chess_in_check(ChessMatch *play, unsigned char team){
@@ -857,6 +865,33 @@ int chess_is_checkmate(ChessMatch *play){
     return 0;
 }
 
+int chess_is_draw(ChessMatch *play){
+    if (chess_in_check(play, play->board.turn)) return 0;
+    
+    ChessMoveList *possible_moves = chess_every_possible_move(play);
+    if (chess_count_moves(possible_moves) == 0) {
+        chess_destroy_move_list(possible_moves);
+        return 1;
+    }
+
+    chess_destroy_move_list(possible_moves);
+    return 0;
+}
+
+int chess_game_end(ChessMatch *play){
+    if (chess_is_draw(play) || chess_is_checkmate(play)) return 1;
+    return 0;
+}
+
+int chess_game_winner(ChessMatch *play){
+    if (chess_is_draw(play)) return DRAW;
+    if (chess_is_checkmate(play)){
+        if (play->board.turn == WHITE) return BLACK;
+        if (play->board.turn == BLACK) return WHITE;
+    }
+    return DRAW;
+}
+
 void chess_promote_to(ChessMove *move, PiecesType promotionType){
     if (move->type == PROMOTION_NORMAL_MOVE ||
         move->type == PROMOTION_CAPTURE_MOVE){
@@ -868,7 +903,8 @@ void chess_choose_and_apply_random(ChessMatch *play){
     ChessMoveList *possible_moves = chess_every_possible_move(play);
     int tam = chess_count_moves(possible_moves);
     if (tam > 0){
-        ChessMove move = chess_move_index(possible_moves, rand()%tam);
+        int idx = rand()%tam;
+        ChessMove move = chess_move_index(possible_moves, idx);
         chess_apply_move(play, &move);
     }
     chess_destroy_move_list(possible_moves);
